@@ -27,7 +27,7 @@ class my_ide_gcc:
 
     def __json_deep_search(self, area, i=0):
         for k in area:
-            print('----' * i, k, sep='')
+            #print('----' * i, k, sep='')
             if  isinstance(area[k],dict):
                 self.__json_deep_search(area[k], i+1)
             else:
@@ -39,8 +39,8 @@ class my_ide_gcc:
                     self.s_files += area[k]
                 elif k == "l_files":
                     self.l_files += area[k]
-                else:            
-                    print(area[k])
+                #else:            
+                    #print(area[k])
     
     def tmake(self):
         # get all value

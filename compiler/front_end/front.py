@@ -10,7 +10,7 @@ sys.path.append(current_file_dir+'/../../components')
 from my_file.my_file import *
 
 # -----------------------------------------------------------------------------------------------
-# python front.py [project_path] [app_name] [vendor_name] [output_path] [firmware_name] [firmware_version]
+# python front.py [project_path] [app_path] [vendor_name] [output_path] [firmware_name] [firmware_version]
 # judge input
 if len(sys.argv) != 7:
     print("[error] input error -> python front.py [project_path] [app_name] [vendor_name] [output_path] [firmware_name] [firmware_version]")
@@ -18,7 +18,7 @@ else:
     print('INPUT:\n\
     -------------------------------------\n\
     project_path:     %s\n\
-    app_name:         %s\n\
+    app_path:         %s\n\
     vendor_name:      %s\n\
     output_path:      %s\n\
     firmware_name:    %s\n\
@@ -29,12 +29,14 @@ else:
 
 # -----------------------------------------------------------------------------------------------
 PROJECT_PATH=sys.argv[1]
-APP_PATH=PROJECT_PATH+"/apps/"+sys.argv[2]
+APP_PATH=PROJECT_PATH+"/"+sys.argv[2]
 COMP_PATH=PROJECT_PATH+"/components"
 LIBS_PATH=PROJECT_PATH+"/libs"
 INCLUDE_PATH=PROJECT_PATH+"/include"
 VENDOR_PATH=PROJECT_PATH+'/vendor/'+sys.argv[3]
 VENDOR_JSON=VENDOR_PATH+'/toolchain/templates/vendor.json'
+CONFIG_FILE=PROJECT_PATH+"/build/tuya_iot.config"
+ADAPTER_PATH=PROJECT_PATH+"/adapter"
 
 
 OUTPUT_PATH=sys.argv[4]
@@ -47,6 +49,7 @@ json_root={
     'components':{},
     'libs':{},
     'include':{},
+    'adapter':{},
     'tkl':{
         'drivers':{},
         'system':{},
@@ -70,7 +73,7 @@ for root, dirs, files in os.walk(COMP_PATH):
 
 for component in components_list:
     print('        -> '+component)
-    json_root['components'][component] = my_file_create_subgroup(COMP_PATH+"/"+component)
+    json_root['components'][component] = my_file_create_subgroup(COMP_PATH+"/"+component,CONFIG_FILE)
 
 
 print('    -> libs')
@@ -78,6 +81,9 @@ json_root['libs'] = my_file_create_subgroup(LIBS_PATH)
 
 print('    -> include')
 json_root['include'] = my_file_create_subgroup(INCLUDE_PATH)
+
+print('    -> adapter')
+json_root['adapter'] = my_file_create_subgroup(ADAPTER_PATH,filter=".h")
 
 
 print('    -> vendor/'+sys.argv[3]+'/tkl\n        -> drivers\n        -> system\n        -> utilities\n        -> bluetooth\n        -> include')

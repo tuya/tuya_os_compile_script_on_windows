@@ -4,6 +4,12 @@ import os
 import json
 import shutil
 import time
+import sys
+
+current_file_dir = os.path.dirname(__file__)  # 当前文件所在的目录
+sys.path.append(current_file_dir+'/../components')
+from my_exe.my_exe import *
+
 
 # 清空一个文件夹（如果已经存在，则删除）
 def my_file_clear_folder(path):
@@ -45,7 +51,7 @@ def my_file_mege_json(json_files,json_file_out):
             fp.close()
 
     with open(json_file_out,'w') as fp_out:
-        fp_out.write(json.dumps(json_root, sort_keys=True, indent=4, separators=(',', ': ')))
+        fp_out.write(json.dumps(json_root, sort_keys=False, indent=4, separators=(',', ': ')))
         fp_out.close()
         
 # 将 json_root 字典，保存为 json 文件
@@ -56,11 +62,13 @@ def my_file_save_json(json_file, json_root):
     
 # 传入一个目录，输出一个字典，包含{ .h 路径; .c; .lib}
 # 如果该目录下本来就有 subdir.json，则用这个里面的
-def my_file_create_subgroup(SOURCES_ROOT):
+# 如果该目录下本来就有 subdir.mk， 则用 kconfig
+# 如果过滤为空，则全部都加
+def my_file_create_subgroup(SOURCES_ROOT,CONFIG_FILE="",filter=""):
     h_list=[]
     c_list=[]
     l_list=[]
-    ret=""
+    ret={}
 
     if os.path.exists(SOURCES_ROOT+'/subdir.json') == True:
         with open(SOURCES_ROOT+'/subdir.json','r') as fp:
@@ -69,16 +77,27 @@ def my_file_create_subgroup(SOURCES_ROOT):
                 ret = json.loads(content)  #json.loads读的是字符串，必须把文件先读出来
 
         fp.close()
+
+    elif os.path.exists(SOURCES_ROOT+'/local.mk') == True: 
+        cmd = "make kconfig LOCAL_PATH=\"%s\" CONFIG=\"%s\" -f %s/makefile"%(SOURCES_ROOT, CONFIG_FILE,current_file_dir) 
+        my_exe_simple(cmd,1)       
+        if os.path.exists(SOURCES_ROOT+"/subdir.json"):
+            ret = my_file_create_subgroup(SOURCES_ROOT)
+            os.remove(SOURCES_ROOT+"/subdir.json")                 
     else:
         for root, dirs, files in os.walk(SOURCES_ROOT):
             for file in files:
                 my_root = root.replace('..','$PROJECT_ROOT')
-                if file.endswith(".h"):
-                    h_list.append(my_root)
-                elif file.endswith(".c"):
-                    c_list.append(my_root+"/"+file)
-                elif file.endswith(".a"):
-                    l_list.append(my_root+"/"+file) 
+                if filter == "":
+                    if file.endswith(".h"):
+                        h_list.append(my_root)
+                    elif file.endswith(".c"):
+                        c_list.append(my_root+"/"+file)
+                    elif file.endswith(".a"):
+                        l_list.append(my_root+"/"+file) 
+                elif filter == ".h":
+                    if file.endswith(".h"):
+                        h_list.append(my_root)
 
         ret = {'c_files':c_list,'h_dir':h_list,'l_files':l_list}
 
