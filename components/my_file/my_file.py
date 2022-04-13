@@ -10,6 +10,27 @@ current_file_dir = os.path.dirname(__file__)  # 当前文件所在的目录
 sys.path.append(current_file_dir+'/../components')
 from my_exe.my_exe import *
 
+# 将数组files中的所有文件复制到目标目录中
+# 如果目录不存在，则创建目录
+def my_file_copy_files_to(files,dst_path):
+    if os.path.exists(dst_path) == False:
+        my_file_clear_folder(dst_path)
+
+    for file in files:
+        shutil.copy(file,dst_path)
+
+# 查找 path数组中的所有路径下的某种类型的文件
+def my_file_find_files_in_paths(paths,kind):
+    ret = []
+    for path in paths:
+        for root, dirs, files in os.walk(path):
+                    for file in files:
+                        if file.endswith(kind):
+                            ret.append(root+'/'+file)
+
+    return ret
+                
+
 
 # 清空一个文件夹（如果已经存在，则删除）
 def my_file_clear_folder(path):
@@ -22,7 +43,7 @@ def my_file_clear_folder(path):
         shutil.rmtree(path, onerror=readonly_handler)
 
     time.sleep(1)
-    os.mkdir(path)
+    os.makedirs(path)
 
 def readonly_handler(func, path, execinfo):
     os.chmod(path, stat.S_IWRITE)
@@ -54,10 +75,20 @@ def my_file_mege_json(json_files,json_file_out):
         fp_out.write(json.dumps(json_root, sort_keys=False, indent=4, separators=(',', ': ')))
         fp_out.close()
         
+# 读取 json_file 返回字典
+def my_file_read_json(json_file):
+    if os.path.exists(json_file) == False:
+        return {}
+
+    with open(json_file,'r') as fp:
+        c = json.load(fp)
+        fp.close()
+        return c
+
 # 将 json_root 字典，保存为 json 文件
 def my_file_save_json(json_file, json_root):
     with open(json_file,'w') as fp2:
-        fp2.write(json.dumps(json_root, sort_keys=True, indent=4, separators=(',', ': ')))
+        fp2.write(json.dumps(json_root, sort_keys=False, indent=4, separators=(',', ': ')))
         fp2.close()
     
 # 传入一个目录，输出一个字典，包含{ .h 路径; .c; .lib}
@@ -103,4 +134,10 @@ def my_file_create_subgroup(SOURCES_ROOT,CONFIG_FILE="",filter=""):
 
     return ret
 
+def my_file_path_formart(path_str):
+    if path_str.endswith('/'):
+        path_str = path_str[:-1]
+    if path_str.startswith('./'):
+        path_str = path_str[2:]
+    return path_str
 

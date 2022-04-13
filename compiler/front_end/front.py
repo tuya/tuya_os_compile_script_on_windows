@@ -28,8 +28,8 @@ else:
 
 
 # -----------------------------------------------------------------------------------------------
-PROJECT_PATH=sys.argv[1]
-APP_PATH=PROJECT_PATH+"/"+sys.argv[2]
+PROJECT_PATH=my_file_path_formart(sys.argv[1])
+APP_PATH=PROJECT_PATH+"/"+my_file_path_formart(sys.argv[2])
 COMP_PATH=PROJECT_PATH+"/components"
 LIBS_PATH=PROJECT_PATH+"/libs"
 INCLUDE_PATH=PROJECT_PATH+"/include"
@@ -37,14 +37,23 @@ VENDOR_PATH=PROJECT_PATH+'/vendor/'+sys.argv[3]
 VENDOR_JSON=VENDOR_PATH+'/toolchain/templates/vendor.json'
 CONFIG_FILE=PROJECT_PATH+"/build/tuya_iot.config"
 ADAPTER_PATH=PROJECT_PATH+"/adapter"
+SDK_CONFIG_JSON=APP_PATH+"/sdkconfig.json"
 
 
-OUTPUT_PATH=sys.argv[4]
+OUTPUT_PATH=PROJECT_PATH+"/"+my_file_path_formart(sys.argv[4])
 FIRMWARE_NAME=sys.argv[5]
 FIRMWARE_VERSION=sys.argv[6]
 
+
 JSON_FILE="project.json"
 json_root={
+    'output':{
+        'path':OUTPUT_PATH,
+        'fw':{
+            'name':FIRMWARE_NAME,
+            'ver':FIRMWARE_VERSION
+        }
+    },
     'app':{},
     'components':{},
     'libs':{},
@@ -61,7 +70,7 @@ json_root={
 
 # -----------------------------------------------------------------------------------------------
 print('CREATE:')
-print('    -> apps/'+sys.argv[2])
+print('    -> apps/'+my_file_path_formart(sys.argv[2]))
 json_root['app'] = my_file_create_subgroup(APP_PATH)
 
 
@@ -93,13 +102,15 @@ json_root['tkl']['utilities'] = my_file_create_subgroup(VENDOR_PATH+"/tuyaos/uti
 json_root['tkl']['bluetooth'] = my_file_create_subgroup(VENDOR_PATH+"/tuyaos/bluetooth")
 json_root['tkl']['include'] = my_file_create_subgroup(VENDOR_PATH+"/tuyaos/include")
 
+print('    -> output')
+sdk_config = my_file_read_json(SDK_CONFIG_JSON)
+json_root['output'].update(sdk_config)
 
-# vendor + tool + output
+# vendor + tool 
 print('    -> vendor/'+sys.argv[3]+'/sdk')
 print('    -> tool')
-print('    -> output')
 print('\nWRITE TO FILE...')
 my_file_save_json(JSON_FILE,json_root)
-my_file_mege_json([VENDOR_JSON,JSON_FILE],JSON_FILE)
+my_file_mege_json([JSON_FILE,VENDOR_JSON],JSON_FILE)
 my_file_str_replace(JSON_FILE,'$PROJECT_ROOT',PROJECT_PATH)
 
