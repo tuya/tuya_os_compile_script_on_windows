@@ -80,63 +80,112 @@ class my_ide_gcc:
                 self.src['l_dirs_str'] += (' -L'+l_dir)
 
     def tsdk(self):
-        libs = self.output['sdk']['libs']
-        output_path = self.output['path']
-        libs_path = output_path+'/libs'
+        print('# 1.Create Output Package...')
+        output_path     = self.output['path']
+        app_path        = output_path + '/apps'
+        comp_path       = output_path + '/components'
+        docs_path       = output_path + '/docs'
+        incs_path       = output_path + '/include'
+        libs_path       = output_path + '/libs'
+        scripts_path    = output_path + '/scripts'
+        tools_path      = output_path + '/tools'
+        log_path        = output_path + '/log'
+    
+        my_file_clear_folder(app_path)
+        my_file_clear_folder(comp_path)
+        my_file_clear_folder(docs_path)
+        my_file_clear_folder(incs_path)
+        my_file_clear_folder(libs_path)
+        my_file_clear_folder(scripts_path)
+        my_file_clear_folder(tools_path)
+        my_file_clear_folder(log_path)
 
+
+        print('# 2.Create libs...')
+        libs = self.output['sdk']['libs']
         print('-> to libs:',libs)
         for k,v in self.output['sdk']['components'].items():
-            lib_component_path=libs_path+'/'+k
-            my_file_clear_folder(lib_component_path)
             if k in libs:
                 print('    ->[Y]',k)
+                # create lib
+                cur_lib = libs_path+'/lib'+k+'.a' 
+                cur_o_files = ''
+
                 for c_file in v['c_files']:
+                    o_file = log_path+'/'+os.path.splitext(os.path.basename(c_file))[0]+'.o'
+                    cur_o_files += (' '+o_file)
+                    cmd = "%s %s %s -c %s -o %s %s"%(self.tool['cc'],self.flag['c'],self.src['h_dir_str'],c_file,o_file,self.macro['c'])
+                    my_exe_simple(cmd,1)
+                    print("        [cc] %s"%(c_file))
+                
+                cmd = '%s -rc %s %s'%(self.tool['ar'],cur_lib,cur_o_files)
+                my_exe_simple(cmd,1)
+                print("        [ar] %s"%(cur_lib))
 
-
+                # copy .h to include
+                my_file_copy_one_kind_files_to(v['h_dir'],'.h',incs_path+'/components/'+k+'/include')
             else:
                 print('    ->[N]',k)
-                c_files = v['c_files']
-                my_file_copy_files_to(c_files, output_path+'/components/'+k+'/src')
-                h_files = my_file_find_files_in_paths(v['h_dir'],'.h')
-                my_file_copy_files_to(h_files, output_path+'/components/'+k+'/include')
+                # copy .c to src
+                my_file_copy_files_to(v['c_files'], comp_path+'/'+k+'/src')
+                # copy .h to include
+                my_file_copy_one_kind_files_to(v['h_dir'],'.h', comp_path+'/'+k+'/include')
+        
+        print('# 3.Create .h API...')
+        project_root = self.output['project_path']
+        adapter_root = project_root+'/adapter'
+        adapters = my_file_find_subdir_in_path(adapter_root)
+        for adapter in adapters:
+            src_path = adapter_root+'/'+adapter+'/include'
+            dst_path = incs_path+'/vendor/adapter/'+adapter+'/include'
+            my_file_copy_dir_to(src_path,dst_path)
+            print('    [cp] cp %s to %s'%(src_path,dst_path))
 
-#my_file_clear_folder(   output_path+'/components/'+k+'src')
+        print('# 4.End...')
+        my_file_rm_dir(log_path)
 
-            
 
     def tbuild(self):
+        output_path = self.output['path']
+        log_path = output_path+'/.log'
+        my_file_clear_folder(log_path)
+
+        o_files = log_path+'/*.o'
+        elf_file = log_path+'/output.elf'
+        lst_file = log_path+'/output.lst'
+        bin_file = log_path+'/output.bin'
+
         # c to .o
         for c_file in self.src['c_files']:
-            cmd = "%s %s %s -c %s -o %s/%s.o %s"%(self.tool['cc'],self.flag['c'],self.src['h_dir_str'],c_file,self.output['path'],os.path.splitext(os.path.basename(c_file))[0],self.macro['c'])    
-            #print(cmd)
+            o_file = log_path+'/'+os.path.splitext(os.path.basename(c_file))[0]+'.o'
+            cmd = "%s %s %s -c %s -o %s %s"%(self.tool['cc'],self.flag['c'],self.src['h_dir_str'],c_file,o_file,self.macro['c'])    
             my_exe_simple(cmd,1)
             print("[cc] %s"%(c_file))
 
         # .s to .o
         for s_file in self.src['s_files']:
-            cmd = "%s %s -c %s -o %s/%s.o"%(self.tool['cc'],self.flag['s'],s_file,self.output['path'],os.path.splitext(os.path.basename(s_file))[0])
-            #print(cmd)
+            o_file = log_path+'/'+os.path.splitext(os.path.basename(s_file))[0]+'.o'
+            cmd = "%s %s -c %s -o %s"%(self.tool['cc'],self.flag['s'],s_file,o_file)
             my_exe_simple(cmd,1)
             print("[cc] %s"%(s_file))
 
         # ld
-        cmd = "%s %s %s/*.o %s \"-(\" %s \"-)\" -o %s/output.elf"%(self.tool['ld'],self.flag['ld'],self.output['path'],self.src['l_dirs_str'],self.src['l_files_str'],self.output['path'])
-        #print(cmd)
+        cmd = "%s %s %s %s \"-(\" %s \"-)\" -o %s"%(self.tool['ld'],self.flag['ld'],o_files,self.src['l_dirs_str'],self.src['l_files_str'],elf_file)
         print("\n[ld] %s"%(cmd))
         my_exe_simple(cmd,1)
 
         # create list
-        cmd = "%s -x -D -l -S %s/output.elf > %s/output.lst"%(self.tool['objdump'],self.output['path'],self.output['path'])
+        cmd = "%s -x -D -l -S %s > %s"%(self.tool['objdump'],elf_file,lst_file)
         print("\n[o-list] %s"%(cmd))
         my_exe_simple(cmd,1)
 
         # change format
-        cmd = "%s -O binary %s/output.elf %s/output.bin"%(self.tool['objcopy'],self.output['path'],self.output['path'])
+        cmd = "%s -O binary %s %s"%(self.tool['objcopy'],elf_file,bin_file)
         print("\n[o-bin] %s"%(cmd))
         my_exe_simple(cmd,1)
 
         # print size
-        cmd = "%s -t %s/output.elf"%(self.tool['size'],self.output['path'])
+        cmd = "%s -t %s"%(self.tool['size'],elf_file)
         print("\n[o-size] %s"%(cmd))
         my_exe_simple(cmd,1)
 

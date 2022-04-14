@@ -48,6 +48,7 @@ FIRMWARE_VERSION=sys.argv[6]
 JSON_FILE="project.json"
 json_root={
     'output':{
+        'project_path':PROJECT_PATH,
         'path':OUTPUT_PATH,
         'fw':{
             'name':FIRMWARE_NAME,

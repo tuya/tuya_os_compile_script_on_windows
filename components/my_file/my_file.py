@@ -19,31 +19,44 @@ def my_file_copy_files_to(files,dst_path):
     for file in files:
         shutil.copy(file,dst_path)
 
+# 将src_paths 数组中所有满足条件的某一类文件，复制到目标目录
+# 如果目录不存在，创建目录
+def my_file_copy_one_kind_files_to(src_paths,kind,dst_path):
+    files = my_file_find_files_in_paths(src_paths,kind)
+    my_file_copy_files_to(files,dst_path)
+
+
+# 将一个目录复制到另一个目录，如果另一个目录已经存在，则删除之
+def my_file_copy_dir_to(from_path,dst_path):
+    my_file_rm_dir(dst_path) 
+    shutil.copytree(from_path,dst_path)
+
 # 查找 path数组中的所有路径下的某种类型的文件
 def my_file_find_files_in_paths(paths,kind):
     ret = []
     for path in paths:
         for root, dirs, files in os.walk(path):
-                    for file in files:
-                        if file.endswith(kind):
-                            ret.append(root+'/'+file)
+            for file in files:
+                if file.endswith(kind):
+                    ret.append(root+'/'+file)
 
     return ret
                 
-
+def my_file_find_subdir_in_path(path):
+    for root, dirs, files in os.walk(path):
+        return dirs 
 
 # 清空一个文件夹（如果已经存在，则删除）
 def my_file_clear_folder(path):
-    """
-    clear specified folder
-    :param path: the path where need to clear.
-    :return:
-    """
-    if os.path.exists(path):
-        shutil.rmtree(path, onerror=readonly_handler)
+    my_file_rm_dir(path)
 
     time.sleep(1)
     os.makedirs(path)
+
+# 删除一个文件夹
+def my_file_rm_dir(path):
+    if os.path.exists(path):
+        shutil.rmtree(path, onerror=readonly_handler)
 
 def readonly_handler(func, path, execinfo):
     os.chmod(path, stat.S_IWRITE)
