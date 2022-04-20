@@ -100,8 +100,21 @@ class my_ide_gcc:
         my_file_clear_folder(tools_path)
         my_file_clear_folder(log_path)
 
-
-        print('# 2.Create libs...')
+        print('# 2.Create include/base  include/vendor/adapter...')    
+        project_root = self.output['project_path']
+        include_root = project_root+'/include'
+        adapter_root = project_root+'/adapter'
+        
+        my_file_copy_dir_to(include_root,incs_path)
+        
+        adapters = my_file_find_subdir_in_path(adapter_root)
+        for adapter in adapters:
+            src_path = adapter_root+'/'+adapter+'/include'
+            dst_path = incs_path+'/vendor/adapter/'+adapter+'/include'
+            my_file_copy_dir_to(src_path,dst_path)
+            print('    [cp] cp %s to %s'%(src_path,dst_path))
+            
+        print('# 3.Create libs...')
         libs = self.output['sdk']['libs']
         print('-> to libs:',libs)
         for k,v in self.output['sdk']['components'].items():
@@ -130,16 +143,6 @@ class my_ide_gcc:
                 my_file_copy_files_to(v['c_files'], comp_path+'/'+k+'/src')
                 # copy .h to include
                 my_file_copy_one_kind_files_to(v['h_dir'],'.h', comp_path+'/'+k+'/include')
-        
-        print('# 3.Create .h API...')
-        project_root = self.output['project_path']
-        adapter_root = project_root+'/adapter'
-        adapters = my_file_find_subdir_in_path(adapter_root)
-        for adapter in adapters:
-            src_path = adapter_root+'/'+adapter+'/include'
-            dst_path = incs_path+'/vendor/adapter/'+adapter+'/include'
-            my_file_copy_dir_to(src_path,dst_path)
-            print('    [cp] cp %s to %s'%(src_path,dst_path))
 
         print('# 4.End...')
         my_file_rm_dir(log_path)
