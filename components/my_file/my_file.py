@@ -8,7 +8,7 @@ import sys
 
 current_file_dir = os.path.dirname(__file__)  # 当前文件所在的目录
 sys.path.append(current_file_dir+'/../components')
-from my_exe.my_exe import *
+from my_exe.my_exe import my_exe_simple,my_exe_make
 
 # 将数组files中的所有文件复制到目标目录中
 # 如果目录不存在，则创建目录
@@ -124,7 +124,7 @@ def my_file_create_subgroup(SOURCES_ROOT,CONFIG_FILE="",filter=""):
 
     elif os.path.exists(SOURCES_ROOT+'/local.mk') == True: 
         cmd = "make kconfig LOCAL_PATH=\"%s\" CONFIG=\"%s\" -f %s/makefile"%(SOURCES_ROOT, CONFIG_FILE,current_file_dir) 
-        my_exe_simple(cmd,1)       
+        my_exe_make(cmd,1)       
         if os.path.exists(SOURCES_ROOT+"/subdir.json"):
             ret = my_file_create_subgroup(SOURCES_ROOT)
             os.remove(SOURCES_ROOT+"/subdir.json")                 

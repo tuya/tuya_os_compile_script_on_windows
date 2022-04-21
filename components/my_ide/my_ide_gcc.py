@@ -197,5 +197,16 @@ class my_ide_gcc:
         print("\n[o-size] %s"%(cmd))
         my_exe_simple(cmd,1)
 
+        DEMO_NAME = self.output['fw']['name']
+        DEMO_FIRMWARE_VERSION =  self.output['fw']['ver']
+        if os.path.exists(bin_file):
+            print('build success')
+            shutil.copy(bin_file, output_path+'/'+DEMO_NAME+'_'+DEMO_FIRMWARE_VERSION+'.bin')
+            shutil.copy(bin_file, output_path+'/'+DEMO_NAME+'_UG_'+DEMO_FIRMWARE_VERSION+'.bin')
+            shutil.copy(bin_file, output_path+'/'+DEMO_NAME+'_UA_'+DEMO_FIRMWARE_VERSION+'.bin')
+            shutil.copy(bin_file, output_path+'/'+DEMO_NAME+'_QIO_'+DEMO_FIRMWARE_VERSION+'.bin')
+            shutil.copy(bin_file, output_path+'/'+DEMO_NAME+'_PROD_'+DEMO_FIRMWARE_VERSION+'.bin')
+            
+            my_file_rm_dir(log_path)
 
 
