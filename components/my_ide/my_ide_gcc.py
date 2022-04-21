@@ -91,22 +91,26 @@ class my_ide_gcc:
         tools_path      = output_path + '/tools'
         log_path        = output_path + '/log'
     
+        project_root = self.output['project_path']
+        docs_root    = project_root+'/docs'
+        include_root = project_root+'/include'
+        adapter_root = project_root+'/adapter'
+        
         my_file_clear_folder(app_path)
         my_file_clear_folder(comp_path)
-        my_file_clear_folder(docs_path)
-        my_file_clear_folder(incs_path)
+        my_file_copy_dir_to(docs_root,docs_path)
+        my_file_copy_dir_to(include_root,incs_path)
         my_file_clear_folder(libs_path)
         my_file_clear_folder(scripts_path)
         my_file_clear_folder(tools_path)
         my_file_clear_folder(log_path)
+        
+        my_file_copy_files_to([project_root+'/CHANGELOG.md',
+                               project_root+'/LICENSE',
+                               project_root+'/README.md',
+                               project_root+'/RELEASE.md'],output_path)
 
-        print('# 2.Create include/base  include/vendor/adapter...')    
-        project_root = self.output['project_path']
-        include_root = project_root+'/include'
-        adapter_root = project_root+'/adapter'
-        
-        my_file_copy_dir_to(include_root,incs_path)
-        
+        print('# 2.Create include/base  include/vendor/adapter...')        
         adapters = my_file_find_subdir_in_path(adapter_root)
         for adapter in adapters:
             src_path = adapter_root+'/'+adapter+'/include'

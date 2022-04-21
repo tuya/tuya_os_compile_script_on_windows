@@ -147,6 +147,9 @@ def my_file_create_subgroup(SOURCES_ROOT,CONFIG_FILE="",filter=""):
 
     return ret
 
+def my_file_get_abs_path_and_formart(relative_path):
+    return os.path.abspath(os.getcwd()+'/'+relative_path).replace('\\','/')
+
 def my_file_path_formart(path_str):
     if path_str.endswith('/'):
         path_str = path_str[:-1]
