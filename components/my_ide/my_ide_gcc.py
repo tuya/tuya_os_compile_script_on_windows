@@ -45,7 +45,8 @@ class my_ide_gcc:
             load_dict = json.load(load_f)
             self.__json_deep_search(load_dict)
 
-        toolchain = load_dict['tool']['toochain']
+        project_root = load_dict['output']['project_path']
+        toolchain = project_root + '/' + load_dict['tool']['toochain']
         self.tool['cc'] = toolchain+'gcc'
         self.tool['ar'] = toolchain+'ar'
         self.tool['ld'] = toolchain+'ld'

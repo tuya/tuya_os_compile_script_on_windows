@@ -143,7 +143,7 @@ def my_file_create_subgroup(SOURCES_ROOT,CONFIG_FILE="",filter=""):
                     if file.endswith(".h"):
                         h_list.append(my_root)
 
-        ret = {'c_files':c_list,'h_dir':h_list,'l_files':l_list}
+        ret = {'c_files':list(set(c_list)),'h_dir':list(set(h_list)),'l_files':list(set(l_list))}
 
     return ret
 

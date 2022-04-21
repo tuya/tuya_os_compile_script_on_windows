@@ -107,6 +107,6 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
     print('\nWRITE TO FILE...')
     my_file_save_json(JSON_FILE,json_root)
     my_file_mege_json([JSON_FILE,VENDOR_JSON],JSON_FILE)
-    my_file_str_replace(JSON_FILE,'$PROJECT_ROOT',PROJECT_PATH)
+    my_file_str_replace(JSON_FILE,'$PROJECT_ROOT','.')#PROJECT_PATH
 
 
