@@ -46,13 +46,17 @@ class my_ide_gcc:
             self.__json_deep_search(load_dict)
 
         project_root = load_dict['output']['project_path']
-        toolchain = project_root + '/' + load_dict['tool']['toochain']
-        self.tool['cc'] = toolchain+'gcc'
-        self.tool['ar'] = toolchain+'ar'
-        self.tool['ld'] = toolchain+'ld'
-        self.tool['size'] = toolchain+'size'
-        self.tool['objcopy'] = toolchain+'objcopy'
-        self.tool['objdump'] = toolchain+'objdump'
+        toolchain_path = project_root + '/' + load_dict['tool']['toochain']['bin_path']
+        toolchain_evn = {**os.environ, 'PATH': toolchain_path + ';' + os.environ['PATH']}
+        
+        prefix = load_dict['tool']['toochain']['prefix']
+        self.tool['evn'] = toolchain_evn
+        self.tool['cc'] = prefix+'gcc'
+        self.tool['ar'] = prefix+'ar'
+        self.tool['ld'] = prefix+'ld'
+        self.tool['size'] = prefix+'size'
+        self.tool['objcopy'] = prefix+'objcopy'
+        self.tool['objdump'] = prefix+'objdump'
 
         self.flag['c'] = load_dict['tool']['c_flags']
         self.flag['s'] = load_dict['tool']['s_flags']
@@ -133,11 +137,11 @@ class my_ide_gcc:
                     o_file = log_path+'/'+os.path.splitext(os.path.basename(c_file))[0]+'.o'
                     cur_o_files += (' '+o_file)
                     cmd = "%s %s %s -c %s -o %s %s"%(self.tool['cc'],self.flag['c'],self.src['h_dir_str'],c_file,o_file,self.macro['c'])
-                    my_exe_simple(cmd,1)
+                    my_exe_simple(cmd,1,self.tool['evn'])
                     print("        [cc] %s"%(c_file))
                 
                 cmd = '%s -rc %s %s'%(self.tool['ar'],cur_lib,cur_o_files)
-                my_exe_simple(cmd,1)
+                my_exe_simple(cmd,1,self.tool['evn'])
                 print("        [ar] %s"%(cur_lib))
 
                 # copy .h to include
@@ -167,35 +171,35 @@ class my_ide_gcc:
         for c_file in self.src['c_files']:
             o_file = log_path+'/'+os.path.splitext(os.path.basename(c_file))[0]+'.o'
             cmd = "%s %s %s -c %s -o %s %s"%(self.tool['cc'],self.flag['c'],self.src['h_dir_str'],c_file,o_file,self.macro['c'])    
-            my_exe_simple(cmd,1)
+            my_exe_simple(cmd,1,self.tool['evn'])
             print("[cc] %s"%(c_file))
 
         # .s to .o
         for s_file in self.src['s_files']:
             o_file = log_path+'/'+os.path.splitext(os.path.basename(s_file))[0]+'.o'
             cmd = "%s %s -c %s -o %s"%(self.tool['cc'],self.flag['s'],s_file,o_file)
-            my_exe_simple(cmd,1)
+            my_exe_simple(cmd,1,self.tool['evn'])
             print("[cc] %s"%(s_file))
 
         # ld
         cmd = "%s %s %s %s \"-(\" %s \"-)\" -o %s"%(self.tool['ld'],self.flag['ld'],o_files,self.src['l_dirs_str'],self.src['l_files_str'],elf_file)
         print("\n[ld] %s"%(cmd))
-        my_exe_simple(cmd,1)
+        my_exe_simple(cmd,1,self.tool['evn'])
 
         # create list
         cmd = "%s -x -D -l -S %s > %s"%(self.tool['objdump'],elf_file,lst_file)
         print("\n[o-list] %s"%(cmd))
-        my_exe_simple(cmd,1)
+        my_exe_simple(cmd,1,self.tool['evn'])
 
         # change format
         cmd = "%s -O binary %s %s"%(self.tool['objcopy'],elf_file,bin_file)
         print("\n[o-bin] %s"%(cmd))
-        my_exe_simple(cmd,1)
+        my_exe_simple(cmd,1,self.tool['evn'])
 
         # print size
         cmd = "%s -t %s"%(self.tool['size'],elf_file)
         print("\n[o-size] %s"%(cmd))
-        my_exe_simple(cmd,1)
+        my_exe_simple(cmd,1,self.tool['evn'])
 
         DEMO_NAME = self.output['fw']['name']
         DEMO_FIRMWARE_VERSION =  self.output['fw']['ver']
