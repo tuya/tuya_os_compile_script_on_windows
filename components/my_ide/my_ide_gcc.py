@@ -102,12 +102,14 @@ class my_ide_gcc:
         libs_path       = output_path + '/libs'
         scripts_path    = output_path + '/scripts'
         tools_path      = output_path + '/tools'
+        vendor_path     = output_path + '/vendor'
         log_path        = output_path + '/log'
     
         project_root = self.output['project_path']
         docs_root    = project_root+'/docs'
         include_root = project_root+'/include'
         adapter_root = project_root+'/adapter'
+        vendor_root  = project_root+'/vendor'
         
         my_file_clear_folder(app_path)
         my_file_clear_folder(comp_path)
@@ -116,6 +118,7 @@ class my_ide_gcc:
         my_file_clear_folder(libs_path)
         my_file_clear_folder(scripts_path)
         my_file_clear_folder(tools_path)
+        my_file_copy_dir_to(vendor_root,vendor_path)
         my_file_clear_folder(log_path)
         
         my_file_copy_files_to([project_root+'/CHANGELOG.md',
