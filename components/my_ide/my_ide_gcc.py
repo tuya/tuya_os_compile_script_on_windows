@@ -5,9 +5,10 @@ import os
 import sys
 
 current_file_dir = os.path.dirname(__file__)  # 当前文件所在的目录
+template_dir = current_file_dir+'/../../template'
 sys.path.append(current_file_dir+'/../components')
 from my_file.my_file import *
-from my_exe.my_exe import *
+from my_exe.my_exe import my_exe_simple
 
 class my_ide_gcc:
     json_file = ""
@@ -113,7 +114,9 @@ class my_ide_gcc:
         my_file_copy_files_to([project_root+'/CHANGELOG.md',
                                project_root+'/LICENSE',
                                project_root+'/README.md',
-                               project_root+'/RELEASE.md'],output_path)
+                               project_root+'/RELEASE.md',
+                               template_dir+'/sdk/build_app.py'],output_path)
+        my_file_copy_files_to([template_dir+'/sdkpre_build.py'],scripts_path)
 
         print('# 2.Create include/base  include/vendor/adapter...')        
         adapters = my_file_find_subdir_in_path(adapter_root)

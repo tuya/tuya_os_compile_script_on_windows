@@ -99,6 +99,8 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
 
     print('    -> output')
     sdk_config = my_file_read_json(SDK_CONFIG_JSON)
+    if sdk_config == {}:
+        sdk_config = {"sdk": {"libs": []}}
     json_root['output'].update(sdk_config)
 
     # vendor + tool 
