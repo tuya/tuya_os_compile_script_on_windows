@@ -10,14 +10,15 @@ import collections
 # Pre Build processing.
 
 # Parameter description：
+# $1 - project_path: ./
 # $1 - Application project name: tuyaos_demo_ble_peripheral
 # $2 - Application project version: 1.0.0
 # python prebuild.py tuyaos_demo_ble_peripheral 1.0.0
 
-PROJECT_ROOT_PATH="..\\"
-DEMO_PATH = PROJECT_ROOT_PATH+sys.argv[1]
-DEMO_NAME = sys.argv[2]
-DEMO_FIRMWARE_VERSION = sys.argv[3]
+PROJECT_ROOT_PATH=sys.argv[1]
+DEMO_PATH = PROJECT_ROOT_PATH+sys.argv[2]
+DEMO_NAME = sys.argv[3]
+DEMO_FIRMWARE_VERSION = sys.argv[4]
 
 TABLE_SPACE = 40
 
