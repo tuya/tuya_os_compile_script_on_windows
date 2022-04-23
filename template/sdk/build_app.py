@@ -50,7 +50,7 @@ print("BUILD_COMMAND: " + BUILD_COMMAND)
 if BUILD_COMMAND == "build":
     print("build...")
     python_path = PYTHON_PATH + ' ./scripts/pre_build.py'
-    para = "%s \"%s\" \"%s\" \"%s\""%(python_path, DEMO_PATH, DEMO_NAME, DEMO_FIRMWARE_VERSION)
+    para = "%s \"%s\" \"%s\" \"%s\" \"%s\""%(python_path, './', DEMO_PATH, DEMO_NAME, DEMO_FIRMWARE_VERSION)
     ret = subprocess.call(para)
     if ret != 0:
         print("prebuild.py execution failed !!!")
@@ -70,11 +70,24 @@ if BUILD_COMMAND == "build":
         sys.exit(1)
 
 
-if BUILD_COMMAND == "flash_app":
-    print("flash app...")
+if BUILD_COMMAND == "flash_user":
+    print("flash user...")
+    python_path = PYTHON_PATH + ' ./vendor/'+BOARD_NAME+'/prepare.py'
+    para = "%s flash_user"%(python_path)
+    ret = subprocess.call(para)
+    if ret != 0:
+        print("flash user execution failed !!!")
+        sys.exit(1)
+   
 
 if BUILD_COMMAND == "flash_all":
     print("flash all...")
+    python_path = PYTHON_PATH + ' ./vendor/'+BOARD_NAME+'/prepare.py'
+    para = "%s flash_all"%(python_path)
+    ret = subprocess.call(para)
+    if ret != 0:
+        print("flash all execution failed !!!")
+        sys.exit(1)
     
 if BUILD_COMMAND == "clean":
     print("clean...")

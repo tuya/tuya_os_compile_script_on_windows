@@ -16,6 +16,7 @@ class my_ide_gcc:
     src = {'c_files':[],'h_dirs':[],'l_files':[],'s_files':[],
            'h_dir_str':'','l_files_str':'','l_dirs_str':''}
     tool = {}
+    flash = {}
     flag = {}
     macro = {}
     output = {}
@@ -58,6 +59,10 @@ class my_ide_gcc:
         self.tool['size'] = prefix+'size'
         self.tool['objcopy'] = prefix+'objcopy'
         self.tool['objdump'] = prefix+'objdump'
+        
+        self.flash['bin_path'] = load_dict['tool']['flash']['bin_path']
+        self.flash['flash_user_cmd'] = load_dict['tool']['flash']['flash_user_cmd']
+        self.flash['flash_all_cmd'] = load_dict['tool']['flash']['flash_all_cmd']
 
         self.flag['c'] = load_dict['tool']['c_flags']
         self.flag['s'] = load_dict['tool']['s_flags']
@@ -68,7 +73,7 @@ class my_ide_gcc:
         self.output = load_dict['output']
         self.output['sdk'].update({'components':load_dict['components']})
 
-        my_file_clear_folder(self.output['path']) 
+        
 
         # h_dirs list change to string
         for h_dir in self.src['h_dirs']:
@@ -86,6 +91,8 @@ class my_ide_gcc:
                 self.src['l_dirs_str'] += (' -L'+l_dir)
 
     def tsdk(self):
+        my_file_clear_folder(self.output['path']) 
+        
         print('# 1.Create Output Package...')
         output_path     = self.output['path']
         app_path        = output_path + '/apps'
@@ -116,7 +123,7 @@ class my_ide_gcc:
                                project_root+'/README.md',
                                project_root+'/RELEASE.md',
                                template_dir+'/sdk/build_app.py'],output_path)
-        my_file_copy_files_to([template_dir+'/sdkpre_build.py'],scripts_path)
+        my_file_copy_files_to([template_dir+'/sdk/pre_build.py'],scripts_path)
 
         print('# 2.Create include/base  include/vendor/adapter...')        
         adapters = my_file_find_subdir_in_path(adapter_root)
@@ -160,7 +167,7 @@ class my_ide_gcc:
         my_file_rm_dir(log_path)
 
 
-    def tbuild(self):
+    def tbuild(self):        
         output_path = self.output['path']
         log_path = output_path+'/.log'
         my_file_clear_folder(log_path)
@@ -216,4 +223,23 @@ class my_ide_gcc:
             
             my_file_rm_dir(log_path)
 
+    def tflash(self,OP):
+        output_path = self.output['path']
+        DEMO_NAME = self.output['fw']['name']
+        DEMO_FIRMWARE_VERSION =  self.output['fw']['ver']
+        FW_UA = output_path+'/'+DEMO_NAME+'_UA_'+DEMO_FIRMWARE_VERSION+'.bin'
+        FW_PROD = output_path+'/'+DEMO_NAME+'_PROD_'+DEMO_FIRMWARE_VERSION+'.bin'
+        
+        project_root = self.output['project_path']
+        bin_path = project_root + '/' + self.flash['bin_path']
+        flash_evn = {**os.environ, 'PATH': self.flash['bin_path'] + ';' + os.environ['PATH']}
+        
+        if OP == 'flash_user':
+            cmd = self.flash['flash_user_cmd'].replace('$FW_UA',FW_UA)
+            print("\n[flash] flash user: %s\n"%(cmd))
+            my_exe_simple(cmd,1,flash_evn)
+        if OP == 'flash_all': 
+            cmd = self.flash['flash_all_cmd'].replace('$FW_PROD',FW_PROD)
+            print("\n[flash] flash all: %s\n"%(cmd))        
+            my_exe_simple(cmd,1,flash_evn)
 
