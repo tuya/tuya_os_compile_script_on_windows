@@ -15,14 +15,16 @@ def my_exe_simple(cmd,wait=0,my_env=None):
 
 def my_exe_make(cmd,wait=0):
     toolchain_path = current_file_dir
-    plat = platform.system().lower()
-    if plat == 'windows':
-        #print('windows')
-        toolchain_path = toolchain_path + '/windows'
-    elif plat == 'linux':
-        #print('linux')
-        toolchain_path = toolchain_path + '/linux'
+    toolchain_path = toolchain_path + '/' + my_exe_get_system_kind()
         
-    my_env = {**os.environ, 'PATH': toolchain_path + ';' + os.environ['PATH']}
+    my_env = my_exe_add_env_path(toolchain_path)
     my_exe_simple(cmd,wait,my_env)   
     
+def my_exe_get_system_kind():
+    return platform.system().lower()
+
+def my_exe_add_env_path(PATH):
+    if my_exe_get_system_kind() == 'windows':
+        return {**os.environ, 'PATH': PATH + ';' + os.environ['PATH']}
+    else:
+        return {**os.environ, 'PATH': PATH + ':' + os.environ['PATH']}

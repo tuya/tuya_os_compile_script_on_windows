@@ -8,7 +8,7 @@ current_file_dir = os.path.dirname(__file__)  # 当前文件所在的目录
 template_dir = current_file_dir+'/../../template'
 sys.path.append(current_file_dir+'/../components')
 from my_file.my_file import *
-from my_exe.my_exe import my_exe_simple
+from my_exe.my_exe import my_exe_simple, my_exe_add_env_path
 
 class my_ide_gcc:
     json_file = ""
@@ -49,7 +49,7 @@ class my_ide_gcc:
 
         project_root = load_dict['output']['project_path']
         toolchain_path = project_root + '/' + load_dict['tool']['toochain']['bin_path']
-        toolchain_evn = {**os.environ, 'PATH': toolchain_path + ';' + os.environ['PATH']}
+        toolchain_evn = my_exe_add_env_path(toolchain_path)
         
         prefix = load_dict['tool']['toochain']['prefix']
         self.tool['evn'] = toolchain_evn
