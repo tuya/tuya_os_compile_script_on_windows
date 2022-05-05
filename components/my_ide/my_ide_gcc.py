@@ -226,6 +226,7 @@ class my_ide_gcc:
                     shutil.copy(fw, output_path+'/'+DEMO_NAME+'_'+DEMO_FIRMWARE_VERSION+suffix)
             else:
                 print('build fail')
+                return
                 
         print('build success')
         my_file_rm_dir(log_path)
@@ -234,19 +235,23 @@ class my_ide_gcc:
         output_path = self.output['path']
         DEMO_NAME = self.output['fw']['name']
         DEMO_FIRMWARE_VERSION =  self.output['fw']['ver']
-        FW_UA = output_path+'/'+DEMO_NAME+'_UA_'+DEMO_FIRMWARE_VERSION+'.bin'
-        FW_PROD = output_path+'/'+DEMO_NAME+'_PROD_'+DEMO_FIRMWARE_VERSION+'.bin'
+        
+        UA_SUFFIX = os.path.splitext(os.path.basename(self.output['fw']['output']['UA']))[1]
+        PROD_SUFFIX = os.path.splitext(os.path.basename(self.output['fw']['output']['PROD']))[1]
+        
+        FW_UA = output_path+'/'+DEMO_NAME+'_UA_'+DEMO_FIRMWARE_VERSION+UA_SUFFIX
+        FW_PROD = output_path+'/'+DEMO_NAME+'_PROD_'+DEMO_FIRMWARE_VERSION+PROD_SUFFIX
         
         project_root = self.output['project_path']
         bin_path = project_root + '/' + self.flash['bin_path']
         flash_evn = {**os.environ, 'PATH': self.flash['bin_path'] + ';' + os.environ['PATH']}
         
         if OP == 'flash_user':
-            cmd = self.flash['flash_user_cmd'].replace('$FW_UA',FW_UA)
+            cmd = self.flash['flash_user_cmd'].replace('$UA',FW_UA)
             print("\n[flash] flash user: %s\n"%(cmd))
             my_exe_simple(cmd,1,flash_evn)
         if OP == 'flash_all': 
-            cmd = self.flash['flash_all_cmd'].replace('$FW_PROD',FW_PROD)
+            cmd = self.flash['flash_all_cmd'].replace('$PROD',FW_PROD)
             print("\n[flash] flash all: %s\n"%(cmd))        
             my_exe_simple(cmd,1,flash_evn)
 
