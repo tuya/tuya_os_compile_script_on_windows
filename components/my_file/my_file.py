@@ -5,6 +5,7 @@ import json
 import shutil
 import time
 import sys
+import re
 
 current_file_dir = os.path.dirname(__file__)  # 当前文件所在的目录
 sys.path.append(current_file_dir+'/../components')
@@ -74,6 +75,14 @@ def my_file_str_replace(file,old,new):
     with open(file,'w') as fp2:
         fp2.write(rep)
         fp2.close()
+        
+# 将字符串按照字典替换
+def my_file_str_replace_with_dict(str,dict):
+    # Create a regular expression  from the dictionary keys
+    regex = re.compile("(%s)" % "|".join(map(re.escape, dict.keys())))
+
+    # For each match, look-up corresponding value in dictionary
+    return regex.sub(lambda mo: dict[mo.string[mo.start():mo.end()]], str)
 
 # 合并 json_files 中的所有 json，保存在 json_file_out
 def my_file_mege_json(json_files,json_file_out):
@@ -156,4 +165,5 @@ def my_file_path_formart(path_str):
     if path_str.startswith('./'):
         path_str = path_str[2:]
     return path_str
+
 

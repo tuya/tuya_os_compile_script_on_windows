@@ -17,8 +17,6 @@ class my_ide_gcc:
            'h_dir_str':'','l_files_str':'','l_dirs_str':''}
     tool = {}
     flash = {}
-    flag = {}
-    macro = {}
     output = {}
 
     def __init__(self,JSON_FILE):
@@ -48,32 +46,28 @@ class my_ide_gcc:
             self.__json_deep_search(load_dict)
 
         project_root = load_dict['output']['project_path']
-        toolchain_path = project_root + '/' + load_dict['tool']['toochain']['bin_path']
+        toolchain_path = project_root + '/' + load_dict['tool']['gcc']['toochain']['bin_path']
         toolchain_evn = my_exe_add_env_path(toolchain_path)
         
-        prefix = load_dict['tool']['toochain']['prefix']
         self.tool['evn'] = toolchain_evn
-        self.tool['cc'] = prefix+'gcc'
-        self.tool['ar'] = prefix+'ar'
-        self.tool['ld'] = prefix+'ld'
-        self.tool['size'] = prefix+'size'
-        self.tool['objcopy'] = prefix+'objcopy'
-        self.tool['objdump'] = prefix+'objdump'
+
+        self.tool['cc'] =               load_dict['tool']['gcc']['cmd']['gcc']['cc']
+        self.tool['c_flags'] =          load_dict['tool']['gcc']['cmd']['gcc']['c_flags']
+        self.tool['s_flags'] =          load_dict['tool']['gcc']['cmd']['gcc']['s_flags']
+        self.tool['c_macros'] =         load_dict['tool']['gcc']['cmd']['gcc']['c_macros']
+        self.tool['ld'] =               load_dict['tool']['gcc']['cmd']['ld']
+        self.tool['objcopy'] =          load_dict['tool']['gcc']['cmd']['objcopy']
+        self.tool['objdump'] =          load_dict['tool']['gcc']['cmd']['objdump']
+        self.tool['size'] =             load_dict['tool']['gcc']['cmd']['size']
+        self.tool['ar'] =               load_dict['tool']['gcc']['cmd']['ar']
         
-        self.flash['bin_path'] = load_dict['tool']['flash']['bin_path']
-        self.flash['flash_user_cmd'] = load_dict['tool']['flash']['flash_user_cmd']
-        self.flash['flash_all_cmd'] = load_dict['tool']['flash']['flash_all_cmd']
-
-        self.flag['c'] = load_dict['tool']['c_flags']
-        self.flag['s'] = load_dict['tool']['s_flags']
-        self.flag['ld'] = load_dict['tool']['ld_flags']
-
-        self.macro['c'] = load_dict['tool']['c_macros']
+        self.flash['bin_path'] =        load_dict['tool']['gcc']['flash']['bin_path']
+        self.flash['flash_user_cmd'] =  load_dict['tool']['gcc']['flash']['flash_user_cmd']
+        self.flash['flash_all_cmd'] =   load_dict['tool']['gcc']['flash']['flash_all_cmd']
 
         self.output = load_dict['output']
         self.output['sdk'].update({'components':load_dict['components']})
-
-        
+        self.output['fw'].update({'output':load_dict['tool']['gcc']['output']})
 
         # h_dirs list change to string
         for h_dir in self.src['h_dirs']:
@@ -149,7 +143,7 @@ class my_ide_gcc:
                 for c_file in v['c_files']:
                     o_file = log_path+'/'+os.path.splitext(os.path.basename(c_file))[0]+'.o'
                     cur_o_files += (' '+o_file)
-                    cmd = "%s %s %s -c %s -o %s %s"%(self.tool['cc'],self.flag['c'],self.src['h_dir_str'],c_file,o_file,self.macro['c'])
+                    cmd = "%s %s %s -c %s -o %s %s"%(self.tool['cc'],self.tool['c_flags'],self.src['h_dir_str'],c_file,o_file,self.tool['c_macros'])
                     my_exe_simple(cmd,1,self.tool['evn'])
                     print("        [cc] %s"%(c_file))
                 
@@ -175,56 +169,66 @@ class my_ide_gcc:
         log_path = output_path+'/.log'
         my_file_clear_folder(log_path)
 
-        o_files = log_path+'/*.o'
-        elf_file = log_path+'/output.elf'
-        lst_file = log_path+'/output.lst'
-        bin_file = log_path+'/output.bin'
+
 
         # c to .o
         for c_file in self.src['c_files']:
             o_file = log_path+'/'+os.path.splitext(os.path.basename(c_file))[0]+'.o'
-            cmd = "%s %s %s -c %s -o %s %s"%(self.tool['cc'],self.flag['c'],self.src['h_dir_str'],c_file,o_file,self.macro['c'])    
+            cmd = "%s %s %s -c %s -o %s %s"%(self.tool['cc'],self.tool['c_flags'],self.src['h_dir_str'],c_file,o_file,self.tool['c_macros'])    
             my_exe_simple(cmd,1,self.tool['evn'])
             print("[cc] %s"%(c_file))
 
         # .s to .o
         for s_file in self.src['s_files']:
             o_file = log_path+'/'+os.path.splitext(os.path.basename(s_file))[0]+'.o'
-            cmd = "%s %s -c %s -o %s"%(self.tool['cc'],self.flag['s'],s_file,o_file)
+            cmd = "%s %s -c %s -o %s"%(self.tool['cc'],self.tool['s_flags'],s_file,o_file)
             my_exe_simple(cmd,1,self.tool['evn'])
             print("[cc] %s"%(s_file))
 
+        cmd_dict = {
+                    '$OUTPUT':log_path,
+                    '$O_FILES':log_path+'/*.o',
+                    '$LIB_DIRS':self.src['l_dirs_str'],
+                    '$LIBS':self.src['l_files_str'],
+                    '$MAP':log_path+'/output.map',
+                    '$ELF':log_path+'/output.elf',
+                    '$LST':log_path+'/output.lst',
+                   }
         # ld
-        cmd = "%s %s %s %s \"-(\" %s \"-)\" -o %s"%(self.tool['ld'],self.flag['ld'],o_files,self.src['l_dirs_str'],self.src['l_files_str'],elf_file)
+        cmd = my_file_str_replace_with_dict(self.tool['ld'],cmd_dict)
         print("\n[ld] %s"%(cmd))
         my_exe_simple(cmd,1,self.tool['evn'])
 
         # create list
-        cmd = "%s -x -D -l -S %s > %s"%(self.tool['objdump'],elf_file,lst_file)
+        cmd = my_file_str_replace_with_dict(self.tool['objdump'],cmd_dict)
         print("\n[o-list] %s"%(cmd))
         my_exe_simple(cmd,1,self.tool['evn'])
 
         # change format
-        cmd = "%s -O binary %s %s"%(self.tool['objcopy'],elf_file,bin_file)
+        cmd = my_file_str_replace_with_dict(self.tool['objcopy'],cmd_dict)
         print("\n[o-bin] %s"%(cmd))
         my_exe_simple(cmd,1,self.tool['evn'])
 
         # print size
-        cmd = "%s -t %s"%(self.tool['size'],elf_file)
+        cmd = my_file_str_replace_with_dict(self.tool['size'],cmd_dict)
         print("\n[o-size] %s"%(cmd))
         my_exe_simple(cmd,1,self.tool['evn'])
 
         DEMO_NAME = self.output['fw']['name']
         DEMO_FIRMWARE_VERSION =  self.output['fw']['ver']
-        if os.path.exists(bin_file):
-            print('build success')
-            shutil.copy(bin_file, output_path+'/'+DEMO_NAME+'_'+DEMO_FIRMWARE_VERSION+'.bin')
-            shutil.copy(bin_file, output_path+'/'+DEMO_NAME+'_UG_'+DEMO_FIRMWARE_VERSION+'.bin')
-            shutil.copy(bin_file, output_path+'/'+DEMO_NAME+'_UA_'+DEMO_FIRMWARE_VERSION+'.bin')
-            shutil.copy(bin_file, output_path+'/'+DEMO_NAME+'_QIO_'+DEMO_FIRMWARE_VERSION+'.bin')
-            shutil.copy(bin_file, output_path+'/'+DEMO_NAME+'_PROD_'+DEMO_FIRMWARE_VERSION+'.bin')
-            
-            my_file_rm_dir(log_path)
+                
+        for k in self.output['fw']['output']:
+            fw = log_path+'/'+self.output['fw']['output'][k]
+            if os.path.exists(fw):
+                suffix = os.path.splitext(os.path.basename(fw))[1]
+                shutil.copy(fw, output_path+'/'+DEMO_NAME+'_'+k+'_'+DEMO_FIRMWARE_VERSION+suffix)
+                if k == 'UA':
+                    shutil.copy(fw, output_path+'/'+DEMO_NAME+'_'+DEMO_FIRMWARE_VERSION+suffix)
+            else:
+                print('build fail')
+                
+        print('build success')
+        my_file_rm_dir(log_path)
 
     def tflash(self,OP):
         output_path = self.output['path']
