@@ -42,7 +42,7 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
     JSON_FILE="project.json"
     json_root={
         'output':{
-            'project_path':'$ABS_PROJECT_PATH',
+            'project_path':'$ABS_PROJECT_ROOT',
             'path':OUTPUT_PATH,
             'fw':{
                 'name':FIRMWARE_NAME,
@@ -110,9 +110,8 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
     my_file_save_json(JSON_FILE,json_root)
     my_file_mege_json([JSON_FILE,VENDOR_JSON],JSON_FILE)
 
-    my_file_str_replace(JSON_FILE,'$PROJECT_ROOT','.')#PROJECT_PATH
-    my_file_str_replace(JSON_FILE,PROJECT_PATH,'.')#PROJECT_PATH
-    my_file_str_replace(JSON_FILE,'$ABS_PROJECT_PATH',PROJECT_PATH)#PROJECT_PATH
+    my_file_str_replace(JSON_FILE,PROJECT_PATH,'$PROJECT_ROOT')#PROJECT_PATH
+    my_file_str_replace(JSON_FILE,'$ABS_PROJECT_ROOT',PROJECT_PATH)#PROJECT_PATH
     my_file_str_replace(JSON_FILE,'\\\\','/')#PROJECT_PATH
     
 

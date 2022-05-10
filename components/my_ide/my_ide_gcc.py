@@ -8,7 +8,7 @@ current_file_dir = os.path.dirname(__file__)  # 当前文件所在的目录
 template_dir = current_file_dir+'/../../template'
 sys.path.append(current_file_dir+'/../components')
 from my_file.my_file import *
-from my_exe.my_exe import my_exe_simple, my_exe_add_env_path
+from my_exe.my_exe import my_exe_simple, my_exe_get_install_path
 
 class my_ide_gcc:
     json_file = ""
@@ -39,19 +39,58 @@ class my_ide_gcc:
                 #else:            
                     #print(area[k])
     
+    def __get_variable_map(self):
+        log_path = '.log'
+        
+        # Get the path to the current python interpreter
+        PYTHON_PATH = sys.executable
+        
+        # Get the keil path
+        EXE_USED_MAP = my_file_str_list_count(self.json_file,['$KEIL_PATH'])
+        print(EXE_USED_MAP)
+        for key in EXE_USED_MAP:
+            if EXE_USED_MAP[key] == 0:
+                EXE_USED_MAP[key] = ""
+            else:
+                EXE_USED_MAP[key] = my_exe_get_install_path(key)
+           
+        # FW
+        output_path = self.output['path']
+        DEMO_NAME = self.output['fw']['name']
+        DEMO_FIRMWARE_VERSION =  self.output['fw']['ver']
+        
+        UA_SUFFIX = os.path.splitext(os.path.basename(self.output['fw']['output']['UA']))[1]
+        PROD_SUFFIX = os.path.splitext(os.path.basename(self.output['fw']['output']['PROD']))[1]
+        
+        FW_UA = output_path+'/'+DEMO_NAME+'_UA_'+DEMO_FIRMWARE_VERSION+UA_SUFFIX
+        FW_PROD = output_path+'/'+DEMO_NAME+'_PROD_'+DEMO_FIRMWARE_VERSION+PROD_SUFFIX
+        
+        return {
+            '$OUTPUT':log_path,
+            '$O_FILES':' '.join(my_file_find_files_in_paths([log_path],'.o')),
+            '$L_FILES':' '.join(self.src['l_files']),
+            '$LIB_DIRS':self.src['l_dirs_str'],
+            '$LIBS':self.src['l_files_str'],
+            '$MAP':log_path+'/output.map',
+            '$ELF':log_path+'/output.elf',
+            '$LST':log_path+'/output.lst',
+            '$PYTHON':PYTHON_PATH,
+            '$KEIL_PATH':EXE_USED_MAP['$KEIL_PATH'],
+            '$UA':FW_UA,
+            '$PROD':FW_PROD,
+       }
+    
     def tmake(self):
         # get all value
+        my_file_str_replace(self.json_file,'$PROJECT_ROOT','.')#PROJECT_PATH
         with open(self.json_file,'r') as load_f:
             load_dict = json.load(load_f)
             self.__json_deep_search(load_dict)
-
-        project_root = load_dict['output']['project_path']
-        toolchain_path = project_root + '/' + load_dict['tool']['gcc']['toochain']['bin_path']
-        toolchain_evn = my_exe_add_env_path(toolchain_path)
         
-        self.tool['evn'] = toolchain_evn
+        self.tool['path'] =             my_file_get_abs_path_and_formart(load_dict['tool']['gcc']['toochain']['bin_path'])
 
         self.tool['cc'] =               load_dict['tool']['gcc']['cmd']['gcc']['cc']
+        self.tool['asm'] =              load_dict['tool']['gcc']['cmd']['gcc']['asm']
         self.tool['c_flags'] =          load_dict['tool']['gcc']['cmd']['gcc']['c_flags']
         self.tool['s_flags'] =          load_dict['tool']['gcc']['cmd']['gcc']['s_flags']
         self.tool['c_macros'] =         load_dict['tool']['gcc']['cmd']['gcc']['c_macros']
@@ -60,8 +99,11 @@ class my_ide_gcc:
         self.tool['objdump'] =          load_dict['tool']['gcc']['cmd']['objdump']
         self.tool['size'] =             load_dict['tool']['gcc']['cmd']['size']
         self.tool['ar'] =               load_dict['tool']['gcc']['cmd']['ar']
+        self.tool['before-build'] =     load_dict['tool']['gcc']['cmd']['before-build']
+        self.tool['after-build'] =      load_dict['tool']['gcc']['cmd']['after-build']
         
-        self.flash['bin_path'] =        load_dict['tool']['gcc']['flash']['bin_path']
+        
+        self.flash['bin_path'] =        my_file_get_abs_path_and_formart(load_dict['tool']['gcc']['flash']['bin_path'])
         self.flash['flash_user_cmd'] =  load_dict['tool']['gcc']['flash']['flash_user_cmd']
         self.flash['flash_all_cmd'] =   load_dict['tool']['gcc']['flash']['flash_all_cmd']
 
@@ -131,7 +173,9 @@ class my_ide_gcc:
             print('    [cp] cp %s to %s'%(src_path,dst_path))
             
         print('# 3.Create libs...')
+        cmd_dict = self.__get_variable_map()
         libs = self.output['sdk']['libs']
+        evn = self.tool['path']
         print('-> to libs:',libs)
         for k,v in self.output['sdk']['components'].items():
             if k in libs:
@@ -144,11 +188,11 @@ class my_ide_gcc:
                     o_file = log_path+'/'+os.path.splitext(os.path.basename(c_file))[0]+'.o'
                     cur_o_files += (' '+o_file)
                     cmd = "%s %s %s -c %s -o %s %s"%(self.tool['cc'],self.tool['c_flags'],self.src['h_dir_str'],c_file,o_file,self.tool['c_macros'])
-                    my_exe_simple(cmd,1,self.tool['evn'])
+                    my_exe_simple(cmd,1,evn,cmd_dict)
                     print("        [cc] %s"%(c_file))
                 
                 cmd = '%s -rc %s %s'%(self.tool['ar'],cur_lib,cur_o_files)
-                my_exe_simple(cmd,1,self.tool['evn'])
+                my_exe_simple(cmd,1,evn,cmd_dict)
                 print("        [ar] %s"%(cur_lib))
 
                 # copy .h to include
@@ -164,56 +208,59 @@ class my_ide_gcc:
         my_file_rm_dir(log_path)
 
 
-    def tbuild(self):        
+    def tbuild(self):  
+        evn = self.tool['path']
+        cmd_dict = self.__get_variable_map()
         output_path = self.output['path']
-        log_path = output_path+'/.log'
+        log_path = cmd_dict['$OUTPUT']
         my_file_clear_folder(log_path)
-
-
+        my_file_clear_folder(output_path)
+        
+        # before build
+        for cmd in self.tool['before-build']:
+            my_exe_simple(cmd,1,evn,cmd_dict)
+            print("\n[o-before-build] %s"%(cmd))
 
         # c to .o
         for c_file in self.src['c_files']:
             o_file = log_path+'/'+os.path.splitext(os.path.basename(c_file))[0]+'.o'
-            cmd = "%s %s %s -c %s -o %s %s"%(self.tool['cc'],self.tool['c_flags'],self.src['h_dir_str'],c_file,o_file,self.tool['c_macros'])    
-            my_exe_simple(cmd,1,self.tool['evn'])
+            cmd = "%s %s %s -c %s -o %s %s"%(self.tool['cc'],self.tool['c_flags'],self.src['h_dir_str'],c_file,o_file,self.tool['c_macros'])
+            my_exe_simple(cmd,1,evn,cmd_dict)
             print("[cc] %s"%(c_file))
 
         # .s to .o
         for s_file in self.src['s_files']:
             o_file = log_path+'/'+os.path.splitext(os.path.basename(s_file))[0]+'.o'
-            cmd = "%s %s -c %s -o %s"%(self.tool['cc'],self.tool['s_flags'],s_file,o_file)
-            my_exe_simple(cmd,1,self.tool['evn'])
+            cmd = "%s %s -c %s -o %s"%(self.tool['asm'],self.tool['s_flags'],s_file,o_file)
+            my_exe_simple(cmd,1,evn,cmd_dict)
             print("[cc] %s"%(s_file))
 
-        cmd_dict = {
-                    '$OUTPUT':log_path,
-                    '$O_FILES':log_path+'/*.o',
-                    '$LIB_DIRS':self.src['l_dirs_str'],
-                    '$LIBS':self.src['l_files_str'],
-                    '$MAP':log_path+'/output.map',
-                    '$ELF':log_path+'/output.elf',
-                    '$LST':log_path+'/output.lst',
-                   }
         # ld
-        cmd = my_file_str_replace_with_dict(self.tool['ld'],cmd_dict)
+        cmd = self.tool['ld'];
         print("\n[ld] %s"%(cmd))
-        my_exe_simple(cmd,1,self.tool['evn'])
+        my_exe_simple(cmd,1,evn,cmd_dict)
 
         # create list
-        cmd = my_file_str_replace_with_dict(self.tool['objdump'],cmd_dict)
+        cmd = self.tool['objdump']
         print("\n[o-list] %s"%(cmd))
-        my_exe_simple(cmd,1,self.tool['evn'])
+        my_exe_simple(cmd,1,evn,cmd_dict)
 
         # change format
-        cmd = my_file_str_replace_with_dict(self.tool['objcopy'],cmd_dict)
+        cmd = self.tool['objcopy']
         print("\n[o-bin] %s"%(cmd))
-        my_exe_simple(cmd,1,self.tool['evn'])
+        my_exe_simple(cmd,1,evn,cmd_dict)
 
         # print size
-        cmd = my_file_str_replace_with_dict(self.tool['size'],cmd_dict)
+        cmd = self.tool['size']
         print("\n[o-size] %s"%(cmd))
-        my_exe_simple(cmd,1,self.tool['evn'])
+        my_exe_simple(cmd,1,evn,cmd_dict)
 
+        # after build
+        for cmd in self.tool['after-build']:
+            print("\n[o-after-build] %s"%(cmd))
+            my_exe_simple(cmd,1,evn,cmd_dict)
+        
+        
         DEMO_NAME = self.output['fw']['name']
         DEMO_FIRMWARE_VERSION =  self.output['fw']['ver']
                 
@@ -229,29 +276,17 @@ class my_ide_gcc:
                 return
                 
         print('build success')
-        my_file_rm_dir(log_path)
 
     def tflash(self,OP):
-        output_path = self.output['path']
-        DEMO_NAME = self.output['fw']['name']
-        DEMO_FIRMWARE_VERSION =  self.output['fw']['ver']
-        
-        UA_SUFFIX = os.path.splitext(os.path.basename(self.output['fw']['output']['UA']))[1]
-        PROD_SUFFIX = os.path.splitext(os.path.basename(self.output['fw']['output']['PROD']))[1]
-        
-        FW_UA = output_path+'/'+DEMO_NAME+'_UA_'+DEMO_FIRMWARE_VERSION+UA_SUFFIX
-        FW_PROD = output_path+'/'+DEMO_NAME+'_PROD_'+DEMO_FIRMWARE_VERSION+PROD_SUFFIX
-        
-        project_root = self.output['project_path']
-        bin_path = project_root + '/' + self.flash['bin_path']
-        flash_evn = {**os.environ, 'PATH': self.flash['bin_path'] + ';' + os.environ['PATH']}
+        cmd_dict = self.__get_variable_map()
+        flash_evn = self.flash['bin_path'];
         
         if OP == 'flash_user':
-            cmd = self.flash['flash_user_cmd'].replace('$UA',FW_UA)
+            cmd = self.flash['flash_user_cmd']
             print("\n[flash] flash user: %s\n"%(cmd))
-            my_exe_simple(cmd,1,flash_evn)
+            my_exe_simple(cmd,1,flash_evn,cmd_dict)
         if OP == 'flash_all': 
-            cmd = self.flash['flash_all_cmd'].replace('$PROD',FW_PROD)
+            cmd = self.flash['flash_all_cmd']
             print("\n[flash] flash all: %s\n"%(cmd))        
-            my_exe_simple(cmd,1,flash_evn)
+            my_exe_simple(cmd,1,flash_evn,cmd_dict)
 

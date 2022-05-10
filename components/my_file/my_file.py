@@ -5,7 +5,7 @@ import json
 import shutil
 import time
 import sys
-import re
+
 
 current_file_dir = os.path.dirname(__file__)  # 当前文件所在的目录
 sys.path.append(current_file_dir+'/../components')
@@ -76,14 +76,16 @@ def my_file_str_replace(file,old,new):
         fp2.write(rep)
         fp2.close()
         
-# 将字符串按照字典替换
-def my_file_str_replace_with_dict(str,dict):
-    # Create a regular expression  from the dictionary keys
-    regex = re.compile("(%s)" % "|".join(map(re.escape, dict.keys())))
-
-    # For each match, look-up corresponding value in dictionary
-    return regex.sub(lambda mo: dict[mo.string[mo.start():mo.end()]], str)
-
+# 判断一个文件中是否有某些字符串
+def my_file_str_list_count(file,strlist):
+    ret = {}
+    with open(file,'r') as fp:
+        contents = fp.read()
+        for str in strlist:
+            ret[str] = (len(contents) - len(contents.replace(str,''))) // len(str)
+        fp.close()
+    return ret
+        
 # 合并 json_files 中的所有 json，保存在 json_file_out
 def my_file_mege_json(json_files,json_file_out):
     json_root={}
@@ -157,7 +159,10 @@ def my_file_create_subgroup(SOURCES_ROOT,CONFIG_FILE="",filter=""):
     return ret
 
 def my_file_get_abs_path_and_formart(relative_path):
-    return os.path.abspath(os.getcwd()+'/'+relative_path).replace('\\','/')
+    if relative_path.startswith('.'):
+        return os.path.abspath(os.getcwd()+'/'+relative_path).replace('\\','/')
+    else:
+        return relative_path
 
 def my_file_path_formart(path_str):
     if path_str.endswith('/'):
