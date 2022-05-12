@@ -5,60 +5,48 @@ import os
 import sys
 import xml.etree.ElementTree as ET 
 
+from my_ide.my_ide_base import my_ide_base
+
 current_file_dir = os.path.dirname(__file__)  # 当前文件所在的目录
 template_dir = current_file_dir+'/../../template'
 sys.path.append(current_file_dir+'/../components')
 from my_file.my_file import *
-from my_exe.my_exe import my_exe_simple, my_exe_add_env_path
+from my_exe.my_exe import my_exe_simple, my_exe_get_install_path
 
-class my_ide_keil:
+class my_ide_keil(my_ide_base):
+    ide_kind = 'keil'
     uvprojx_path = ''
-    insert_group_num = 0
+    insert_group_num = 0   
 
-    json_file = ""
+    def tmake(self):
+        my_ide_base.tmake(self,'..')
 
-    src = {'c_files':[],'h_dirs':[],'l_files':[],'s_files':[],
-           'h_dir_str':'','l_files_str':'','l_dirs_str':''}
-    tool = {}
-    flash = {}
-    flag = {}
-    macro = {}
-    output = {}
+    def tbuild(self):        
+        print('\nBUILD')
+        KEIL_PATH = my_exe_get_install_path('$KEIL_PATH')   
+        UV4_PATH = KEIL_PATH+'/UV4'
+        
+        cmd = 'UV4.exe -j0 -b ./.log/Demo.uvprojx'
+        print('> [cmd]:'+cmd)
+        print('> wait about 2 min ...')
+        my_exe_simple(cmd,1,UV4_PATH,None)
+        
+        my_ide_base.tbuild(self)
 
-    def __init__(self,JSON_FILE):
-        self.json_file = JSON_FILE
-
-    def __json_deep_search(self, area, group_name='', i=0):
-        for k in area:
-            #print('----' * i, k, sep='')
-            if  isinstance(area[k],dict):
-                old_group_name = group_name
-                if group_name == '':
-                    group_name = k
-                else:
-                    group_name = group_name+'/'+k
-
-                self.__json_deep_search(area[k], group_name, i+1)
-                group_name = old_group_name
-            else:
-                if k == "c_files":
-                    print(group_name)
-                    self.__create_subgroup(self.uvprojx_path,'.c',area[k],group_name)
-                elif k == "h_dir":
-                    self.__create_subgroup(self.uvprojx_path,'.h',area[k],'')
-                elif k == "s_files":
-                    self.__create_subgroup(self.uvprojx_path,'.s',area[k],group_name+'/s')
-                elif k == "l_files":
-                    self.__create_subgroup(self.uvprojx_path,'.lib',area[k],group_name+'/libs')
-                #else:            
-                    #print(area[k])
-    
-
-    def __create_subgroup(self,UVPROJX_PATH,KIND,LIST,GROUP_NAME):
+    def _create_subgroup(self,KIND,LIST,GROUP_NAME):
+        my_ide_base._create_subgroup(self,KIND,LIST,GROUP_NAME)
         if len(LIST) == 0:
             return
+        
+        if self.uvprojx_path == '':
+            # copy keil to output
+            keil_path         =  self.cmd['bin_path'][1:] # ../vendor -> ./vendor
+            build_path        =  '.log'
+            my_file_copy_dir_contents_to(keil_path,build_path)
+        
+            self.uvprojx_path =  build_path+'/Demo.uvprojx' 
 
-        tree = ET.parse(UVPROJX_PATH)
+        tree = ET.parse(self.uvprojx_path)
         root = tree.getroot()
 
         if KIND == '.c' or KIND == '.lib' or KIND == '.s':
@@ -81,7 +69,7 @@ class my_ide_keil:
                     FilePath.text = file
             Groups.insert(self.insert_group_num, Group)
             self.insert_group_num+=1
-            tree.write(UVPROJX_PATH, encoding='utf-8', xml_declaration=True)
+            tree.write(self.uvprojx_path, encoding='utf-8', xml_declaration=True)
 
         elif KIND == '.h':
             IncludePath = root.find("Targets").find("Target").find("TargetOption").find("TargetArmAds").find("Cads").find("VariousControls").find("IncludePath")
@@ -91,34 +79,7 @@ class my_ide_keil:
             for path in set(LIST):
                 IncludePath.text = path  + ";" + IncludePath.text
             
-            tree.write(UVPROJX_PATH, encoding='utf-8', xml_declaration=True)
+            tree.write(self.uvprojx_path, encoding='utf-8', xml_declaration=True)
 
         else:
             print("KIND INPUT ERROR")
-
-
-    def tmake(self):
-        # get all value
-        with open(self.json_file,'r') as load_f:
-            load_dict = json.load(load_f)
-            
-            project_root      =  load_dict['output']['project_path']
-            output_path       =  (load_dict['output']['path']).replace('$PROJECT_ROOT',project_root)
-            keil_path         =  (load_dict['tool']['keil']['toolchain']['bin_path']).replace('$PROJECT_ROOT',project_root)
-            self.uvprojx_path =  output_path+'/keil/Demo.uvprojx' 
-            # copy keil to output
-            my_file_copy_dir_to(keil_path,output_path+'/keil')
-            
-            self.insert_group_num = 0
-            self.__json_deep_search(load_dict)
-
-            my_file_str_replace(self.uvprojx_path,'$PROJECT_ROOT','../..') 
-
-    def tsdk(self):
-        print('tsdk')
-
-    def tbuild(self):        
-        print('tbuild')    
-
-    def tflash(self,OP):
-        print('tflash')

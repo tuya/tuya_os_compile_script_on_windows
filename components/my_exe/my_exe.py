@@ -16,8 +16,11 @@ def my_exe_simple(cmd,wait=0,my_env=None,var_map=None):
         cmd = my_string_replace_with_dict(cmd,var_map)
         if my_env != None:
             my_env = my_string_replace_with_dict(my_env,var_map)
-            my_env = my_exe_add_env_path(my_env)
-    
+           
+    if my_env != None:
+        my_env = my_exe_add_env_path(my_env)
+     
+    #print('[cmd]:',cmd[:1000])
     dev = subprocess.Popen(cmd,env=my_env,shell=True,universal_newlines=True,bufsize=1)
     #dev = subprocess.Popen(cmd,shell=True,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=None,universal_newlines=True,bufsize=1)
     if wait == 1:
@@ -27,8 +30,7 @@ def my_exe_make(cmd,wait=0):
     toolchain_path = current_file_dir
     toolchain_path = toolchain_path + '/' + my_exe_get_system_kind()
         
-    my_env = my_exe_add_env_path(toolchain_path)
-    my_exe_simple(cmd,wait,my_env)   
+    my_exe_simple(cmd,wait,toolchain_path)   
     
 def my_exe_get_system_kind():
     return platform.system().lower()

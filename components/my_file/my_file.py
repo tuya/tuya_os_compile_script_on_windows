@@ -32,6 +32,27 @@ def my_file_copy_dir_to(from_path,dst_path):
     my_file_rm_dir(dst_path) 
     shutil.copytree(from_path,dst_path)
 
+# 将一个目录下的所有内容复制到另一个文件夹，如果另一个目录不存在，则创建
+def my_file_copy_dir_contents_to(from_path,dst_path):
+    if not os.path.exists(dst_path):
+        my_file_copy_dir_to(from_path,dst_path)
+    else:
+        # root 所指的是当前正在遍历的这个文件夹的本身的地址
+        # dirs 是一个 list，内容是该文件夹中所有的目录的名字(不包括子目录)
+        # files 同样是 list, 内容是该文件夹中所有的文件(不包括子目录)
+        for root, dirs, files in os.walk(from_path):
+            for file in files:
+                src_file = os.path.join(root, file)
+                shutil.copy(src_file, dst_path)
+                #print('CP FILE->',src_file)
+            for _dir in dirs:
+                src_dir = os.path.join(root, _dir)
+                dst_dir = os.path.join(dst_path, _dir)
+                shutil.copytree(src_dir,dst_dir)
+                #print('CP DIR ->',src_dir)
+            
+            return
+        
 # 查找 path数组中的所有路径下的某种类型的文件
 def my_file_find_files_in_paths(paths,kind):
     ret = []
