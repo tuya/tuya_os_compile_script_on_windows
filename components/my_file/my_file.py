@@ -179,6 +179,8 @@ def my_file_create_subgroup(SOURCES_ROOT,CONFIG_FILE="",filter=""):
                         c_list.append(my_root+"/"+file)
                     elif file.endswith(".a"):
                         l_list.append(my_root+"/"+file) 
+                    elif file.endswith(".lib"):
+                        l_list.append(my_root+"/"+file) 
                 elif filter == ".h":
                     if file.endswith(".h"):
                         h_list.append(my_root)
