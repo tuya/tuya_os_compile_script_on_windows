@@ -49,6 +49,13 @@ def my_exe_get_install_path(NAME):
            'FATHER':1,
            'TITLE':'请选择 Keil 的可执行文件 "UV4.exe"'
         }
+        #,
+        #'$CMSIS_VER':{
+        #   'PATH':'C:/Keil_v5',
+        #   'KEY':'UV4',
+        #   'FATHER':1,
+        #   'TITLE':'请选择 Keil 的可执行文件 "UV4.exe"'
+        #}
     }
     
     # Get the keil path
@@ -84,4 +91,14 @@ def my_exe_get_install_path(NAME):
       
         EXE_PATH = os.path.abspath(os.path.join(evn,'../'*EXE_TOOL[NAME]['FATHER'])).replace('\\','/')
         
+    # 附属变量获取
+    # 1. $CMSIS_PATH -- 是先从环境变量中获取 KEIL_PATH，然后计算 CMSIS_PATH
+    # if NAME == '$CMSIS_PATH':
+    #    EXE_PATH += '/ARM/PACK/ARM/CMSIS'
+    #    for root, dirs, files in os.walk(EXE_PATH):
+    #        if len(dirs) > 0:
+    #            dirs.sort(reverse = True)
+    #            EXE_PATH += ('/'+dirs[0])
+    #        break
+    
     return EXE_PATH

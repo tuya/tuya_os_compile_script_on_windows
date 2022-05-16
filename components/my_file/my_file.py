@@ -5,6 +5,7 @@ import json
 import shutil
 import time
 import sys
+import stat
 
 
 current_file_dir = os.path.dirname(__file__)  # 当前文件所在的目录
@@ -19,6 +20,9 @@ def my_file_copy_files_to(files,dst_path):
 
     for file in files:
         shutil.copy(file,dst_path)
+
+def my_file_copy_file_to_file(file_from,file_to):
+    shutil.copy(file_from,file_to)
 
 # 将src_paths 数组中所有满足条件的某一类文件，复制到目标目录
 # 如果目录不存在，创建目录
@@ -83,6 +87,10 @@ def my_file_rm_dir(path):
 def readonly_handler(func, path, execinfo):
     os.chmod(path, stat.S_IWRITE)
     func(path)
+
+# 删除一个文件
+def my_file_rm_file(file):
+    os.remove(file)
 
 
 # 将文件中的一个老的字符串替换为新的

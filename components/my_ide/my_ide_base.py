@@ -250,6 +250,10 @@ class my_ide_base(object):
             '$LST':self.__log_path+'/output.lst',
             '$PYTHON':PYTHON_PATH,
             '$KEIL_PATH':EXE_USED_MAP['$KEIL_PATH'],
+
             '$UA':FW_UA,
-            '$PROD':FW_PROD,
-       }      
+            '$PROD':FW_PROD
+        }      
+        
+        my_file_save_json(self.__log_path+'/var_map.json',self.var_map)
+       
