@@ -3,6 +3,8 @@
 import json
 import os
 import sys
+import threading
+import time
 import xml.etree.ElementTree as ET 
 
 from my_ide.my_ide_base import my_ide_base
@@ -18,6 +20,7 @@ class my_ide_keil(my_ide_base):
     uvprojx_path = ''
     uv4_path = ''
     insert_group_num = 0   
+    counter = 0
 
     def tmake(self):
         my_ide_base.tmake(self,'..')
@@ -31,6 +34,13 @@ class my_ide_keil(my_ide_base):
         cmd = 'UV4.exe -j0 -b ./.log/Demo.uvprojx'
         print('> [cmd]:'+cmd)
         print('> wait about 2 min ...')
+        try:
+            self.counter = 0
+            t1 = threading.Thread(target = self.__show_keil_log, args = ('./.log/Objects/Demo.build_log.htm',))
+            t1.setDaemon(True)
+            t1.start()
+        except e:
+            pass
         my_exe_simple(cmd,1,self.uv4_path,None)
         
         my_ide_base.tbuild(self)
@@ -180,3 +190,21 @@ class my_ide_keil(my_ide_base):
 
         else:
             print("KIND INPUT ERROR")
+        
+    # KEIL log 实时显示
+    def __show_keil_log(self,log_file_path):
+        while 1<2:
+            time.sleep(0.5)
+            if os.path.exists(log_file_path):
+                line_num = sum(1 for line in open(log_file_path))
+                if line_num > self.counter:
+                    with open(log_file_path, "r") as fp:
+                        lines = fp.readlines()
+                        for line in lines[self.counter:]:
+                            print(line,end='')
+                        self.counter = line_num
+                elif line_num < self.counter:
+                    self.counter = 0
+            
+        
+    
