@@ -13,6 +13,7 @@ current_file_dir = os.path.dirname(__file__)  # 当前文件所在的目录
 template_dir = current_file_dir+'/../../template'
 sys.path.append(current_file_dir+'/../components')
 from my_file.my_file import *
+from my_file.my_file_scatter import my_file_scatter
 from my_exe.my_exe import my_exe_simple, my_exe_get_install_path
 
 class my_ide_keil(my_ide_base):
@@ -30,20 +31,13 @@ class my_ide_keil(my_ide_base):
 
     def tbuild(self):        
         print('\nBUILD')
-
-        cmd = 'UV4.exe -j0 -b ./.log/Demo.uvprojx'
-        print('> [cmd]:'+cmd)
-        print('> wait about 2 min ...')
-        try:
-            self.counter = 0
-            t1 = threading.Thread(target = self.__show_keil_log, args = ('./.log/Objects/Demo.build_log.htm',))
-            t1.setDaemon(True)
-            t1.start()
-        except e:
-            pass
-        my_exe_simple(cmd,1,self.uv4_path,None)
         
-        my_ide_base.tbuild(self)
+        # 是否需要动态调节 scatter file
+        if self.cmd['scatter_file']['auto_adjust'] == '1':
+            sct = my_file_scatter('.log/Demo.uvprojx', '.log/'+self.cmd['scatter_file']['path'], '.log/'+self.cmd['log_file'])
+            sct.build_with_scatter_adjust(self.__build_keil)
+        else:
+            self.__build_keil()
 
     def _tlib(self,libs_path,incs_path,comp_path,log_path):
         print('# 3.Create libs...')
@@ -205,6 +199,23 @@ class my_ide_keil(my_ide_base):
                         self.counter = line_num
                 elif line_num < self.counter:
                     self.counter = 0
+    
+    # KEIL BUILD
+    def __build_keil(self):
+        cmd = 'UV4.exe -j0 -b ./.log/Demo.uvprojx'
+        print('> [cmd]:'+cmd)
+        print('> wait about 2 min ...')
+        try:
+            self.counter = 0
+            t1 = threading.Thread(target = self.__show_keil_log, args = ('.log/'+self.cmd['log_file'],))
+            t1.setDaemon(True)
+            t1.start()
+        except e:
+            pass
+        my_exe_simple(cmd,1,self.uv4_path,None)
+
+        ret = my_ide_base.tbuild(self)
+        return ret
             
         
     

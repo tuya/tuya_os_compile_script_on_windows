@@ -92,9 +92,10 @@ class my_ide_base(object):
                     shutil.copy(fw, output_path+'/'+DEMO_NAME+'_'+DEMO_FIRMWARE_VERSION+suffix)
             else:
                 print('> build fail')
-                return
+                return 0
                 
         print('> build success')
+        return 1
       
     # 形成 SDK
     def tsdk(self):
