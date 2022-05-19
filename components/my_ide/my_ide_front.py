@@ -44,6 +44,7 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
         'output':{
             'project_path':'$ABS_PROJECT_ROOT',
             'path':OUTPUT_PATH,
+            'vendor':vendor_name,
             'fw':{
                 'name':FIRMWARE_NAME,
                 'ver':FIRMWARE_VERSION

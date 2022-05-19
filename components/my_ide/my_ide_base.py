@@ -106,6 +106,7 @@ class my_ide_base(object):
         template_dir    = my_ide_base_file_dir+'/../../template'
         
         output_path     = self.output['path']
+        vendor_name     = self.output['vendor']
         app_path        = output_path + '/apps'
         comp_path       = output_path + '/components'
         docs_path       = output_path + '/docs'
@@ -128,7 +129,13 @@ class my_ide_base(object):
         my_file_clear_folder(libs_path)
         my_file_clear_folder(scripts_path)
         my_file_clear_folder(tools_path)
-        my_file_copy_dir_to(vendor_root,vendor_path)
+        my_file_copy_dir_to(vendor_root+'/'+vendor_name,vendor_path+'/'+vendor_name)
+        
+        # 删除 toolchain/software 中的解压之后的文件，让 SDK 小一些
+        software_path = vendor_path+'/'+vendor_name+'/toolchain/software/'
+        unzip_dir = my_file_find_subdir_in_path(software_path)
+        for subdir in unzip_dir:
+            my_file_rm_dir(software_path+subdir)
         
         my_file_copy_files_to([project_root+'/CHANGELOG.md',
                                project_root+'/LICENSE',
