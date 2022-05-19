@@ -116,7 +116,7 @@ class my_file_scatter:
                         GroupName.text.startswith('comp/') == True or \
                         GroupName.text.startswith('tkl/') == True:
                         insert.append('	' + os.path.splitext(FileName.text)[0] + '.o (+RO)\n')
-                    elif GroupName.text == 'libs':
+                    elif GroupName.text == 'libs/libs':
                         insert.append('	' + os.path.splitext(FileName.text)[0] + '.lib (+RO)\n')
         
         start = self.__find_str_line_num("SCATTER_XIP_FILE")
