@@ -48,6 +48,12 @@ def my_exe_get_install_path(NAME):
            'KEY':'UV4',
            'FATHER':1,
            'TITLE':'请选择 Keil 的可执行文件 "UV4.exe"'
+        },
+        '$CDK_PATH':{
+           'PATH':'D:/C-Sky/CDK',
+           'KEY':'CDK',
+           'FATHER':0,
+           'TITLE':'请选择 Keil 的可执行文件 "cdk.exe"'
         }
         #,
         #'$CMSIS_VER':{

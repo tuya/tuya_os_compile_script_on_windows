@@ -10,6 +10,7 @@ if current_file_dir == '':
 sys.path.append(current_file_dir+'/components')
 from my_ide.my_ide_gcc import *
 from my_ide.my_ide_keil import *
+from my_ide.my_ide_cdk import *
 from my_ide.my_ide_front import my_ide_front
 
 def ide_tool_front(project_path,app_path,vendor_name,output_path,firmware_name,firmware_version):
@@ -20,6 +21,8 @@ def ide_tool_back(OP,JSON_FILE,KIND='gcc'):
         ide = my_ide_gcc(JSON_FILE)
     elif KIND == 'keil':
         ide = my_ide_keil(JSON_FILE)
+    elif KIND == 'cdk':
+        ide = my_ide_cdk(JSON_FILE)
 
     ide.tmake()
         
