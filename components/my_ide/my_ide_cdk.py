@@ -48,6 +48,26 @@ class my_ide_cdk(my_ide_base):
         print('\n> [cmd]:'+cmd)
         my_exe_simple(cmd,1,self.cdk_path,None)
         
+        print('\nMAX Stack Usage:==========================')
+        find = 0
+        if os.path.exists('Lst/Demo.htm'):
+            for line in open('Lst/Demo.htm','r'):
+                if 'Maximum Stack Usage' in line:
+                    find = 1
+                if find != 0:
+                    print(line.replace('&rArr;','->').replace('<h3>','').replace('</h3>','').replace('</ul>',''),end ='')
+                    find = find + 1
+                    if find > 3:
+                        break
+        print('==========================================\n')
+        
+        print('RES Usage:================================')
+        if os.path.exists('Lst/Demo.map'):
+            for line in open('Lst/Demo.map','r'):
+                if 'Total	' in line:
+                    print(line,end ='')
+        print('==========================================\n')
+        
         os.chdir(CURR_PATH)
         
         my_ide_base.tbuild(self)
@@ -65,21 +85,40 @@ class my_ide_cdk(my_ide_base):
             if k in libs:
                 print('    ->[Y]',k)
                 # create lib
-                cur_lib = '../'+libs_path+'/lib'+k+'.lib' 
+                cur_lib = '../'+libs_path+'/lib'+k+'.a' 
+                output_lib = './Obj/lib'+k+'.a'
                 
-                sdk_cdkproj_path = '../.log/SdkDemo.uvprojx'
-                my_file_copy_file_to_file('../.log/Demo.uvprojx',sdk_cdkproj_path)
+                sdk_cdkproj_path = '../.log/SdkDemo.cdkproj'
+                sdk_cdkws_path = '../.log/SdkDemo.cdkws'
+                my_file_copy_file_to_file('../.log/Demo.cdkproj',sdk_cdkproj_path)
+                my_file_copy_file_to_file('../.log/Demo.cdkws',sdk_cdkws_path)
 
                 # print('    ->[LIB]:',cur_lib)
                 self.__delete_group_in_cdk(sdk_cdkproj_path)
                 self.__insert_file_to_cdk(sdk_cdkproj_path,'.c',v['c_files'],'sdk')
                 self.__insert_file_to_cdk(sdk_cdkproj_path,'.h',v['h_dir'],'')
-                self.__make_cdk_output_lib(sdk_cdkproj_path,cur_lib)
+                self.__make_cdk_output_lib(sdk_cdkproj_path,sdk_cdkws_path,'lib'+k)
                 
-                cmd = 'UV4.exe -j0 -b SdkDemo.uvprojx'
+                cmd = 'cdk-make.exe  --workspace=\"SdkDemo.cdkws\"   --command=\"clean\"  --project=\"Demo\"  --config=\"BuildSet\" 2>NUL 1>NUL'
+                #print('\n> [cmd]:'+cmd)
                 my_exe_simple(cmd,1,self.cdk_path,None)
                 
+                cmd = 'cdk-make.exe  --workspace=\"SdkDemo.cdkws\"   --command=\"build\"  --project=\"Demo\"  --config=\"BuildSet\" 2>NUL 1>NUL'
+                #print('\n> [cmd]:'+cmd)
+                my_exe_simple(cmd,1,self.cdk_path,None)
+                
+                
                 my_file_rm_file(sdk_cdkproj_path)
+                my_file_rm_file(sdk_cdkws_path)
+                
+                
+                if os.path.exists(output_lib):
+                    my_file_copy_file_to_file(output_lib,cur_lib)
+                    print('        ->Success')
+                else:
+                    print('        ->Fail')
+                    exit(0)
+                    
                 
                 # copy .h to include
                 my_file_copy_one_kind_files_to(v['h_dir'],'.h','../'+incs_path+'/components/'+k+'/include') 
@@ -88,20 +127,9 @@ class my_ide_cdk(my_ide_base):
                 # copy .c to src
                 my_file_copy_files_to(v['c_files'], '../'+comp_path+'/'+k+'/src')
                 # copy .h to include
-                my_file_copy_one_kind_files_to(v['h_dir'],'.h', '../'+comp_path+'/'+k+'/include')
-        
-        # 清除掉生成 lib 时产生的中间文件
-        for root, dirs, files in os.walk('../'+libs_path):
-            for file in files:
-                if not file.endswith('.lib'):
-                    my_file_rm_file(os.path.join(root,file))
-            break        
+                my_file_copy_one_kind_files_to(v['h_dir'],'.h', '../'+comp_path+'/'+k+'/include')      
         
         os.chdir(CURR_PATH)
-        
-    def __create_lib(self,sdk_uvprojx,C_FILE_LIST,H_DIR_LIST):
-        tree = ET.parse(sdk_uvprojx)
-        root = tree.getroot()
     
     def _create_subgroup(self,KIND,LIST,GROUP_NAME):
         my_ide_base._create_subgroup(self,KIND,LIST,GROUP_NAME)
@@ -123,41 +151,52 @@ class my_ide_cdk(my_ide_base):
     # CDK 操作内部函数
     ###########################################################
     # 将 cdk 工程中的 Groups 下增加的 .c、.lib 全部删除
+    # delete_between "<Dependencies" "<BuildConfigs>" "false" $myfile (不包含起始位置）
     def __delete_group_in_cdk(self,cdkproj_path):
-        tree = ET.parse(cdkproj_path)
-        root = tree.getroot()
-        
-        Groups = root.find("Targets").find("Target").find("Groups")
-        Groups.clear()
-            
-        tree.write(cdkproj_path, encoding='utf-8', xml_declaration=True)
+        find = False
+        contant = ''
+
+        for line in open(cdkproj_path,'r'):
+            if '<BuildConfigs>' in line:
+                find = False
+            if find == False:
+                contant = contant + line
+            if '<Dependencies' in line:
+                find = True
+                
+        with open(cdkproj_path,'w') as fp2:
+            fp2.write(contant)
+            fp2.close()
+                
         
     # 将 cdk 工程切换为输出 lib 库模式
-    def __make_cdk_output_lib(self,cdkproj_path,output_lib):
+    def __make_cdk_output_lib(self,cdkproj_path,cdkws_path,output_lib):
+        # 雕刻 cdkproj
+        # my_file_str_replace(cdkproj_path,'<Type>Executable','<Type>Static Library')
+        # my_file_str_replace(cdkproj_path,'<CallGraph>yes','<CallGraph>no')
+        # my_file_str_replace(cdkproj_path,'<Map>yes','<Map>no')
         tree = ET.parse(cdkproj_path)
         root = tree.getroot()
         
-        TargetCommonOption = root.find("Targets").find("Target").find("TargetOption").find("TargetCommonOption")
+        Output = root.find("BuildConfigs").find("BuildConfig").find("Output")
         
-        AfterMake = TargetCommonOption.find("AfterMake")
-        RunUserProg1 = AfterMake.find("RunUserProg1")
-        RunUserProg2 = AfterMake.find("RunUserProg2")
-
-        RunUserProg1.text = '0'
-        RunUserProg2.text = '0'
+        OutputOutputName = Output.find("OutputName")
+        OutputType = Output.find("Type")
+        OutputCallGraph = Output.find("CallGraph")
+        OutputMap = Output.find("Map")
         
-        CreateExecutable = TargetCommonOption.find("CreateExecutable")
-        CreateLib = TargetCommonOption.find("CreateLib")
-        OutputDirectory = TargetCommonOption.find("OutputDirectory")
-        OutputName = TargetCommonOption.find("OutputName")
+        OutputOutputName.text = output_lib
+        OutputType.text = 'Static Library'
+        OutputCallGraph.text = 'no'
+        OutputMap.text = 'no'
         
-        CreateExecutable.text = '0'
-        CreateLib.text = '1'   
-        OutputDirectory.text = os.path.dirname(output_lib).replace('/','\\')+'\\'
-        OutputName.text = os.path.basename(output_lib)
-        
+        ET.indent(tree)
         tree.write(cdkproj_path, encoding='utf-8', xml_declaration=True)
-    
+        
+        # 雕刻 cdkws
+        my_file_str_replace(cdkws_path,'Demo','SdkDemo')
+        #my_file_str_replace(cdkws_path,'<Project Name=\"Demo\"','<Project Name=\"SdkDemo\"')
+        
     # 将相应文件插入到 cdk 工程
     def __insert_file_to_cdk(self,cdkproj_path,KIND,LIST,GROUP_NAME):
         tree = ET.parse(cdkproj_path)
@@ -172,7 +211,6 @@ class my_ide_cdk(my_ide_base):
             # 寻找是否存在 comp 或者 vendor/sdk 或者 tkl 开头的，将其合并
             father_node = None
             Groups = GROUP_NAME.split('/') 
-            print('x->',Groups)
             if Groups[0] == 'comp' or (Groups[0] == 'vendor' and Groups[1] == 'sdk') or Groups[0] == 'tkl':
                 # https://lxml.de/tutorial.html ElementPath
                 VDs = root.findall("VirtualDirectory")
@@ -186,7 +224,6 @@ class my_ide_cdk(my_ide_base):
                             Groups = Groups[1:]
                             father_node = vd
                            
-                        print('-->',Groups)
                         break 
                             
             # 新增的节点树，长在 VirtualDirectoryRoot 上
@@ -214,6 +251,7 @@ class my_ide_cdk(my_ide_base):
                 Dependencies = root.find("Dependencies")
                 Dependencies.addnext(VirtualDirectoryRoot)  # 添加到同级，而不是父子关系
             
+            ET.indent(tree)
             tree.write(cdkproj_path, encoding='utf-8', xml_declaration=True)
 
         elif KIND == '.h':
@@ -224,6 +262,7 @@ class my_ide_cdk(my_ide_base):
             for path in set(LIST):
                 IncludePath.text = path  + ";" + IncludePath.text
             
+            ET.indent(tree) # format
             tree.write(cdkproj_path, encoding='utf-8', xml_declaration=True)
 
         else:

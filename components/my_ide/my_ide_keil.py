@@ -5,7 +5,8 @@ import os
 import sys
 import threading
 import time
-import xml.etree.ElementTree as ET 
+
+import lxml.etree as ET
 
 from my_ide.my_ide_base import my_ide_base
 
@@ -85,10 +86,6 @@ class my_ide_keil(my_ide_base):
             break        
         
         os.chdir(CURR_PATH)
-        
-    def __create_lib(self,sdk_uvprojx,C_FILE_LIST,H_DIR_LIST):
-        tree = ET.parse(sdk_uvprojx)
-        root = tree.getroot()
     
     def _create_subgroup(self,KIND,LIST,GROUP_NAME):
         my_ide_base._create_subgroup(self,KIND,LIST,GROUP_NAME)
@@ -116,7 +113,8 @@ class my_ide_keil(my_ide_base):
         
         Groups = root.find("Targets").find("Target").find("Groups")
         Groups.clear()
-            
+        
+        ET.indent(tree) # format        
         tree.write(uvprojx_path, encoding='utf-8', xml_declaration=True)
         
     # 将 keil 工程切换为输出 lib 库模式
@@ -143,6 +141,7 @@ class my_ide_keil(my_ide_base):
         OutputDirectory.text = os.path.dirname(output_lib).replace('/','\\')+'\\'
         OutputName.text = os.path.basename(output_lib)
         
+        ET.indent(tree) # format
         tree.write(uvprojx_path, encoding='utf-8', xml_declaration=True)
     
     # 将相应文件插入到 keil 工程
@@ -170,6 +169,8 @@ class my_ide_keil(my_ide_base):
                     FilePath.text = file
             Groups.insert(self.insert_group_num, Group)
             self.insert_group_num+=1
+            
+            ET.indent(tree) # format
             tree.write(uvprojx_path, encoding='utf-8', xml_declaration=True)
 
         elif KIND == '.h':
@@ -180,6 +181,7 @@ class my_ide_keil(my_ide_base):
             for path in set(LIST):
                 IncludePath.text = path  + ";" + IncludePath.text
             
+            ET.indent(tree) # format
             tree.write(uvprojx_path, encoding='utf-8', xml_declaration=True)
 
         else:
