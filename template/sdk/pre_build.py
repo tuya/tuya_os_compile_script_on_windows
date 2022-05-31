@@ -1,8 +1,11 @@
 # coding:utf-8
 import os
+from pickle import FALSE, TRUE
+import string
 import sys
 import json
 import collections
+import subprocess
 
 #*****************************************************************#
 # NOTE: This script is a compiled script. Please do not modify it #
@@ -20,28 +23,39 @@ DEMO_PATH = PROJECT_ROOT_PATH+sys.argv[2]
 DEMO_NAME = sys.argv[3]
 DEMO_FIRMWARE_VERSION = sys.argv[4]
 
-TABLE_SPACE = 40
-
 DEMO_CONFIG_NAME = 'appconfig.json'
 DEMO_CONFIG_PATH = os.path.join(DEMO_PATH, DEMO_CONFIG_NAME)
 DEMO_SRC_PATH = os.path.join(DEMO_PATH, 'src')
 DEMO_INC_PATH = os.path.join(DEMO_PATH, 'include')
 
+support_mesh = FALSE
+TABLE_SPACE = 40
+
+DEMO_HARDWARE_VERSION = ''
+DEMO_MESH_CATEGORY = ''
+DEMO_PRODUCTKEY = ''
+DEMO_IS_FIRMWARE_KEY = ''
+DEMO_NEED_PUBLISH_ADDR = ''
 
 def version_string_to_hex(version):
-    str = version.split('.')
-    version_int = ((ord(str[1]) << 8) | ord(str[0]))
-    version_hex = "{:#1x}".format(version_int)
+    version_int = 0
+    nums = version.split('.')[::-1]
+    if support_mesh == TRUE:
+        idx = 0
+        while idx < len(nums):
+            version_int |= ord(nums[idx]) << (idx*8)
+            idx += 1
+        version_hex = "{:#1x}".format(version_int)
+    else:
+        idx = 0
+        while idx < len(nums):
+            version_int |= int(nums[idx]) << (idx*8)
+            idx += 1
+        version_hex = "{:#010x}".format(version_int)
     return version_hex
-    
-def hw_version_string_to_hex(version):
-    str = version.split('.')
-    version_int = ((ord(str[0]) << 16) | (ord(str[1]) << 8) | ord(str[2]))
-    version_hex = "{:#1x}".format(version_int)
-    return version_hex
-
 
 def app_config_firmware_info_get():
+    global support_mesh
     global DEMO_HARDWARE_VERSION
     global DEMO_MESH_CATEGORY
     global DEMO_PRODUCTKEY
@@ -53,10 +67,16 @@ def app_config_firmware_info_get():
     fileJson = json.load(file, object_pairs_hook = collections.OrderedDict)
     DEMO_HARDWARE_VERSION = fileJson['firmware_info']['hardware_version']
 
-    DEMO_MESH_CATEGORY = fileJson['product_info']['mesh_category']
-    DEMO_PRODUCTKEY = fileJson['product_info']['product_key']
-    DEMO_IS_FIRMWARE_KEY = fileJson['product_info']['is_firmware_key']
-    DEMO_NEED_PUBLISH_ADDR = fileJson['product_info']['need_publish_addr']
+    if fileJson.__contains__('product_info'):
+        if fileJson['product_info'].__contains__('mesh_category'):
+            support_mesh = TRUE
+
+    if support_mesh == TRUE:
+        DEMO_MESH_CATEGORY = fileJson['product_info']['mesh_category']
+        DEMO_PRODUCTKEY = fileJson['product_info']['product_key']
+        DEMO_IS_FIRMWARE_KEY = fileJson['product_info']['is_firmware_key']
+        DEMO_NEED_PUBLISH_ADDR = fileJson['product_info']['need_publish_addr']
+
     file.close()
     print("app_config firmware information parse success")
 
@@ -103,17 +123,25 @@ def __generate_app_config_h(fileObj):
     fileObj.writelines("#include \"tuya_cloud_types.h\"" + '\n\n')
     fileObj.writelines("/* automatically generated app firmware information! */" + '\n')
 
-    fileObj.writelines("#define BUILD_FIRMNAME".ljust(TABLE_SPACE) + '\"' + DEMO_NAME + '\"' + '\n')
-    fileObj.writelines("#define FW_VERSION".ljust(TABLE_SPACE) + '\"' + DEMO_FIRMWARE_VERSION + '\"' + '\n')
-    fileObj.writelines("#define FW_VERSION_HEX".ljust(TABLE_SPACE) + version_string_to_hex(DEMO_FIRMWARE_VERSION) + '\n')
-    fileObj.writelines("#define HARDWARE_VERSION".ljust(TABLE_SPACE) + '\"' + DEMO_HARDWARE_VERSION + '\"' + '\n')
-    fileObj.writelines("#define HARDWARE_VERSION_HEX".ljust(TABLE_SPACE) + hw_version_string_to_hex(DEMO_HARDWARE_VERSION) + '\n\n')
-    
-    fileObj.writelines("#define MESH_CATEGORY".ljust(TABLE_SPACE) + '0x' + DEMO_MESH_CATEGORY + '\n')
-    fileObj.writelines("#define PRODUCTKEY".ljust(TABLE_SPACE) + '\"' + DEMO_PRODUCTKEY + '\"' + '\n')
-    fileObj.writelines("#define IS_FIRMWARE_KEY".ljust(TABLE_SPACE) + DEMO_IS_FIRMWARE_KEY + '\n')
-    fileObj.writelines("#define NEED_PUBLISH_ADDR".ljust(TABLE_SPACE) + DEMO_NEED_PUBLISH_ADDR + '\n')
+    if not support_mesh == TRUE:
+        fileObj.writelines("#define FIRMWARE_NAME".ljust(TABLE_SPACE) + '\"' + DEMO_NAME + '\"' + '\n')
+        fileObj.writelines("#define FIRMWARE_VERSION".ljust(TABLE_SPACE) + '\"' + DEMO_FIRMWARE_VERSION + '\"' + '\n')
+        fileObj.writelines("#define FIRMWARE_VERSION_HEX".ljust(TABLE_SPACE) + version_string_to_hex(DEMO_FIRMWARE_VERSION) + '\n')
+        fileObj.writelines("#define HARDWARE_VERSION".ljust(TABLE_SPACE) + '\"' + DEMO_HARDWARE_VERSION + '\"' + '\n')
+        fileObj.writelines("#define HARDWARE_VERSION_HEX".ljust(TABLE_SPACE) + version_string_to_hex(DEMO_HARDWARE_VERSION) + '\n\n')
 
+        fileObj.writelines("OPERATE_RET app_config_info_set(VOID_T);" + '\n\n')
+    else:
+        fileObj.writelines("#define BUILD_FIRMNAME".ljust(TABLE_SPACE) + '\"' + DEMO_NAME + '\"' + '\n')
+        fileObj.writelines("#define FW_VERSION".ljust(TABLE_SPACE) + '\"' + DEMO_FIRMWARE_VERSION + '\"' + '\n')
+        fileObj.writelines("#define FW_VERSION_HEX".ljust(TABLE_SPACE) + version_string_to_hex(DEMO_FIRMWARE_VERSION) + '\n')
+        fileObj.writelines("#define HARDWARE_VERSION".ljust(TABLE_SPACE) + '\"' + DEMO_HARDWARE_VERSION + '\"' + '\n')
+        fileObj.writelines("#define HARDWARE_VERSION_HEX".ljust(TABLE_SPACE) + version_string_to_hex(DEMO_HARDWARE_VERSION) + '\n\n')
+        fileObj.writelines("#define MESH_CATEGORY".ljust(TABLE_SPACE) + '0x' + DEMO_MESH_CATEGORY + '\n')
+        fileObj.writelines("#define PRODUCTKEY".ljust(TABLE_SPACE) + '\"' + DEMO_PRODUCTKEY + '\"' + '\n')
+        fileObj.writelines("#define IS_FIRMWARE_KEY".ljust(TABLE_SPACE) + DEMO_IS_FIRMWARE_KEY + '\n')
+        fileObj.writelines("#define NEED_PUBLISH_ADDR".ljust(TABLE_SPACE) + DEMO_NEED_PUBLISH_ADDR + '\n')
+    
     fileObj.writelines("#endif" + '\n\n')
     fileObj.close()
 
@@ -144,7 +172,7 @@ if __name__ == "__main__":
     inc_path = os.path.join(DEMO_INC_PATH, 'app_config.h')
     src_path = os.path.join(DEMO_SRC_PATH, 'app_config.c')
     generate_app_config_h(inc_path)
-    #generate_app_config_c(src_path)
+    if not support_mesh == TRUE:
+        generate_app_config_c(src_path)
     print("\r\n> prebuild end------------------------------------")
-
 
