@@ -4,9 +4,16 @@ import sys
 import os
 import json
 
+def get_abspath(relative_path):
+    if os.path.isabs(relative_path):
+        return os.path.abspath(relative_path).replace('\\','/')
+    else:
+        return os.path.abspath(os.getcwd()+'/'+relative_path).replace('\\','/')
+
 current_file_dir = os.path.dirname(__file__)  # 当前文件所在的目录
 if current_file_dir == '':
     current_file_dir = '.'
+PROJECT_ROOT_DIR = get_abspath(current_file_dir + '/..')
 sys.path.append(current_file_dir+'/components')
 from my_ide.my_ide_gcc import *
 from my_ide.my_ide_keil import *
@@ -20,7 +27,7 @@ def ide_tool_back(OP,JSON_FILE,KIND='gcc'):
     if KIND == 'gcc':
         ide = my_ide_gcc(JSON_FILE)
     elif KIND == 'keil':
-        ide = my_ide_keil(JSON_FILE)
+        ide = my_ide_keil(JSON_FILE,PROJECT_ROOT_DIR)
     elif KIND == 'cdk':
         ide = my_ide_cdk(JSON_FILE)
 

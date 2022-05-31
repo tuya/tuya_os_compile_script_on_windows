@@ -35,7 +35,7 @@ class my_ide_keil(my_ide_base):
         
         # 是否需要动态调节 scatter file
         if self.cmd['scatter_file']['auto_adjust'] == '1':
-            sct = my_file_scatter('.log/Demo.uvprojx', '.log/'+self.cmd['scatter_file']['path'], '.log/'+self.cmd['log_file'])
+            sct = my_file_scatter(self.root_dir + '/.log/Demo.uvprojx', self.root_dir + '/.log/'+self.cmd['scatter_file']['path'], self.root_dir + '/.log/'+self.cmd['log_file'])
             sct.build_with_scatter_adjust(self.__build_keil)
         else:
             self.__build_keil()
@@ -94,8 +94,8 @@ class my_ide_keil(my_ide_base):
         
         if self.uvprojx_path == '':
             # copy keil to output
-            keil_path         =  self.cmd['bin_path'][1:] # ../vendor -> ./vendor
-            build_path        =  '.log'
+            keil_path         =  self.root_dir + self.cmd['bin_path'][2:] # ../vendor -> ./vendor
+            build_path        =  self.root_dir + '/.log'
             my_file_copy_dir_contents_to(keil_path,build_path)
         
             self.uvprojx_path =  build_path+'/Demo.uvprojx' 
@@ -204,7 +204,7 @@ class my_ide_keil(my_ide_base):
     
     # KEIL BUILD
     def __build_keil(self):
-        cmd = 'UV4.exe -j0 -b ./.log/Demo.uvprojx'
+        cmd = 'UV4.exe -j0 -b %s/.log/Demo.uvprojx'%(self.root_dir)
         print('> [cmd]:'+cmd)
         print('> wait about 2 min ...')
         try:
@@ -212,7 +212,7 @@ class my_ide_keil(my_ide_base):
             t1 = threading.Thread(target = self.__show_keil_log, args = ('.log/'+self.cmd['log_file'],))
             t1.setDaemon(True)
             t1.start()
-        except e:
+        except Exception:
             pass
         my_exe_simple(cmd,1,self.uv4_path,None)
 

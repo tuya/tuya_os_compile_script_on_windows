@@ -11,7 +11,6 @@ from my_exe.my_exe import my_exe_simple, my_exe_get_install_path
 
 class my_ide_base(object):
     json_file = ""
-    __log_path = '.log'
     
     src = {'c_files':[],'h_dirs':[],'l_files':[],'s_files':[],
            'h_dir_str':'','l_files_str':'','l_dirs_str':''}
@@ -21,8 +20,10 @@ class my_ide_base(object):
     var_map = {}
 
     # 初始化
-    def __init__(self,JSON_FILE):
-        self.json_file = JSON_FILE
+    def __init__(self,JSON_FILE,ROOT_DIR):
+        self.json_file = ROOT_DIR + JSON_FILE[1:]
+        self.root_dir = ROOT_DIR
+        self.__log_path = ROOT_DIR + '/' + '.log'
         print(JSON_FILE)
         
     # make
@@ -76,14 +77,14 @@ class my_ide_base(object):
     def tbuild(self):
         print('> build end, create final fw...')
         # 编译结束，产生最终固件产物
-        output_path = self.output['path']
+        output_path = self.root_dir + '/' + self.output['path']
         my_file_clear_folder(output_path)
         
         DEMO_NAME = self.output['fw']['name']
         DEMO_FIRMWARE_VERSION =  self.output['fw']['ver']
                 
         for k in self.output['fw']['output']:
-            fw = './.log/'+self.output['fw']['output'][k]
+            fw = self.root_dir + '/.log/'+self.output['fw']['output'][k]
             print('copy %s -> %s' %(fw,k))
             if os.path.exists(fw):
                 suffix = os.path.splitext(os.path.basename(fw))[1]
