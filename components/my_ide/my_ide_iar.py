@@ -2,9 +2,11 @@
 # coding=utf-8
 import json
 import os
+from pickle import TRUE
 import sys
 import threading
 import time
+from tokenize import group
 
 import lxml.etree as ET
 
@@ -17,8 +19,8 @@ from my_file.my_file import *
 from my_file.my_file_scatter import my_file_scatter
 from my_exe.my_exe import my_exe_simple, my_exe_get_install_path
 
-class my_ide_keil(my_ide_base):
-    ide_kind = 'keil'
+class my_ide_iar(my_ide_base):
+    ide_kind = 'iar'
     uvprojx_path = ''
     uv4_path = ''
     insert_group_num = 0   
@@ -27,18 +29,23 @@ class my_ide_keil(my_ide_base):
     def tmake(self):
         my_ide_base.tmake(self,'..')
         
-        KEIL_PATH = my_exe_get_install_path('$KEIL_PATH')   
-        self.uv4_path = KEIL_PATH+'/UV4'
+        IAR_PATH = my_exe_get_install_path('$IAR_PATH')   
+        self.uv4_path = IAR_PATH+'/IarBuild.exe'
 
-    def tbuild(self):        
+    def tbuild(self):
         print('\nBUILD')
-        
-        # 是否需要动态调节 scatter file
-        if self.cmd.__contains__('scatter_file') and self.cmd['scatter_file']['auto_adjust'] == '1':
-            sct = my_file_scatter('.log/Demo.uvprojx', '.log/'+self.cmd['scatter_file']['path'], '.log/'+self.cmd['log_file'])
-            sct.build_with_scatter_adjust(self.__build_keil)
-        else:
-            self.__build_keil()
+        cmd = 'IarBuild.exe ./.log/Demo.ewp -build * -log all'
+        print('> [cmd]:'+cmd)
+        print('> wait about 2 min ...')
+        my_exe_simple(cmd,1,self.uv4_path,None)
+
+        DEMO_NAME = self.output['fw']['name']
+        DEMO_FIRMWARE_VERSION =  self.output['fw']['ver']
+
+        cmd = 'python3 ./.log/postbuild.py %s "%s"'%(DEMO_NAME, DEMO_FIRMWARE_VERSION)
+        my_exe_simple(cmd,1,None,None)
+
+        my_ide_base.tbuild(self)
 
     def _tlib(self,libs_path,incs_path,comp_path,log_path):
         print('# 3.Create libs...')
@@ -59,10 +66,10 @@ class my_ide_keil(my_ide_base):
                 my_file_copy_file_to_file('../.log/Demo.uvprojx',sdk_uvprojx_path)
 
                 # print('    ->[LIB]:',cur_lib)
-                self.__delete_group_in_keil(sdk_uvprojx_path)
-                self.__insert_file_to_keil(sdk_uvprojx_path,'.c',v['c_files'],'sdk')
-                self.__insert_file_to_keil(sdk_uvprojx_path,'.h',v['h_dir'],'')
-                self.__make_keil_output_lib(sdk_uvprojx_path,cur_lib)
+                self.__delete_group_in_iar(sdk_uvprojx_path)
+                self.__insert_file_to_iar(sdk_uvprojx_path,'.c',v['c_files'],'sdk')
+                self.__insert_file_to_iar(sdk_uvprojx_path,'.h',v['h_dir'],'')
+                self.__make_iar_output_lib(sdk_uvprojx_path,cur_lib)
                 
                 cmd = 'UV4.exe -j0 -b SdkDemo.uvprojx'
                 my_exe_simple(cmd,1,self.uv4_path,None)
@@ -93,21 +100,21 @@ class my_ide_keil(my_ide_base):
             return
         
         if self.uvprojx_path == '':
-            # copy keil to output
-            keil_path         =  self.cmd['bin_path'][1:] # ../vendor -> ./vendor
+            # copy iar to output
+            iar_path         =  self.cmd['bin_path'][1:] # ../vendor -> ./vendor
             build_path        =  '.log'
-            my_file_copy_dir_contents_to(keil_path,build_path)
+            my_file_copy_dir_contents_to(iar_path,build_path)
         
-            self.uvprojx_path =  build_path+'/Demo.uvprojx' 
+            self.uvprojx_path =  build_path+'/Demo.ewp' 
 
-        self.__insert_file_to_keil(self.uvprojx_path,KIND,LIST,GROUP_NAME)
+        self.__insert_file_to_iar(self.uvprojx_path,KIND,LIST,GROUP_NAME)
        
        
     ###########################################################
-    # KEIL 操作内部函数
+    # IAR 操作内部函数
     ###########################################################
-    # 将 keil 工程中的 Groups 下增加的 .c、.lib 全部删除
-    def __delete_group_in_keil(self,uvprojx_path):
+    # 将 iar 工程中的 Groups 下增加的 .c、.lib 全部删除
+    def __delete_group_in_iar(self,uvprojx_path):
         tree = ET.parse(uvprojx_path)
         root = tree.getroot()
         
@@ -117,8 +124,8 @@ class my_ide_keil(my_ide_base):
         ET.indent(tree) # format        
         tree.write(uvprojx_path, encoding='utf-8', xml_declaration=True)
         
-    # 将 keil 工程切换为输出 lib 库模式
-    def __make_keil_output_lib(self,uvprojx_path,output_lib):
+    # 将 iar 工程切换为输出 lib 库模式
+    def __make_iar_output_lib(self,uvprojx_path,output_lib):
         tree = ET.parse(uvprojx_path)
         root = tree.getroot()
         
@@ -144,80 +151,40 @@ class my_ide_keil(my_ide_base):
         ET.indent(tree) # format
         tree.write(uvprojx_path, encoding='utf-8', xml_declaration=True)
     
-    # 将相应文件插入到 keil 工程
-    def __insert_file_to_keil(self,uvprojx_path,KIND,LIST,GROUP_NAME):
+    # 将相应文件插入到 iar 工程
+    def __insert_file_to_iar(self,uvprojx_path,KIND,LIST,GROUP_NAME):
         tree = ET.parse(uvprojx_path)
         root = tree.getroot()
 
-        if KIND == '.c' or KIND == '.lib' or KIND == '.s':
-            Groups = root.find("Targets").find("Target").find("Groups")
-            Group = ET.Element('Group')
-            GroupName = ET.SubElement(Group, 'GroupName')
-            GroupName.text = GROUP_NAME
-            Files = ET.SubElement(Group, 'Files')
+        if KIND == '.c' or KIND == '.lib' or KIND == '.s' or KIND == '.a':
+            if KIND == '.lib':
+                KIND = '.a'
+                
+            group = ET.SubElement(root, 'group')
+            group_name = ET.SubElement(group, 'name')
+            group_name.text = GROUP_NAME
 
-            kind_map = {'.c' : '1', '.lib' : '4', '.s' : '2'}
-
-            for file in LIST:
-                if file.endswith(KIND):
-                    File = ET.SubElement(Files, 'File')
-                    FileName = ET.SubElement(File, 'FileName')
-                    FileName.text = os.path.basename(file) 
-                    FileType = ET.SubElement(File, 'FileType')
-                    FileType.text = kind_map[KIND]
-                    FilePath = ET.SubElement(File, 'FilePath')
-                    FilePath.text = file
-            Groups.insert(self.insert_group_num, Group)
-            self.insert_group_num+=1
+            for file_dir in LIST:
+                if file_dir.endswith(KIND):
+                    file = ET.SubElement(group, 'file')
+                    file_name = ET.SubElement(file, 'name')
+                    file_name.text = '$PROJ_DIR$/' + file_dir
             
             ET.indent(tree) # format
             tree.write(uvprojx_path, encoding='utf-8', xml_declaration=True)
 
         elif KIND == '.h':
-            IncludePath = root.find("Targets").find("Target").find("TargetOption").find("TargetArmAds").find("Cads").find("VariousControls").find("IncludePath")
-            if IncludePath.text == None:
-                IncludePath.text = ""
-
-            for path in set(LIST):
-                IncludePath.text = path  + ";" + IncludePath.text
-            
-            ET.indent(tree) # format
-            tree.write(uvprojx_path, encoding='utf-8', xml_declaration=True)
+            for ele in root.find('configuration').iter("option"):
+                name = ele.find('name')
+                if name != None and name.text == 'CCIncludePath2':
+                    for path in set(LIST):
+                        state = ET.SubElement(ele, 'state')
+                        state.text = '$PROJ_DIR$/' + path
+                    
+                    ET.indent(tree) # format
+                    tree.write(uvprojx_path, encoding='utf-8', xml_declaration=True)
+                    break
 
         else:
             print("KIND INPUT ERROR")
         
-    # KEIL log 实时显示
-    def __show_keil_log(self,log_file_path):
-        while 1<2:
-            time.sleep(0.5)
-            if os.path.exists(log_file_path):
-                line_num = sum(1 for line in open(log_file_path))
-                if line_num > self.counter:
-                    with open(log_file_path, "r") as fp:
-                        lines = fp.readlines()
-                        for line in lines[self.counter:]:
-                            print(line,end='')
-                        self.counter = line_num
-                elif line_num < self.counter:
-                    self.counter = 0
-    
-    # KEIL BUILD
-    def __build_keil(self):
-        cmd = 'UV4.exe -j0 -b ./.log/Demo.uvprojx'
-        print('> [cmd]:'+cmd)
-        print('> wait about 2 min ...')
-        try:
-            self.counter = 0
-            t1 = threading.Thread(target = self.__show_keil_log, args = ('.log/'+self.cmd['log_file'],))
-            t1.setDaemon(True)
-            t1.start()
-        except e:
-            pass
-        my_exe_simple(cmd,1,self.uv4_path,None)
-
-        ret = my_ide_base.tbuild(self)
-        return ret
-            
-        
-    
