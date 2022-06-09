@@ -22,6 +22,11 @@ class my_depend():
             self.__check_and_install('kconfiglib','kconfiglib')           
 
         try:
+            import xmltodict
+        except ImportError as e:
+            self.__check_and_install('xmltodict','xmltodict')
+            
+        try:
             import lxml
         except ImportError as e:
             self.__check_and_install('lxml','lxml')
