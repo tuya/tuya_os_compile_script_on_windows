@@ -218,6 +218,8 @@ class my_ide_base(object):
                     self._create_subgroup('.s',area[k],group_name+'/s')
                 elif k == "l_files":
                     self._create_subgroup('.lib',area[k],group_name+'/libs')
+                elif k == "a_files":
+                    self._create_subgroup('.a',area[k],group_name+'/a')
                 #else:            
                     #print(area[k])
                     

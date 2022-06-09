@@ -64,6 +64,12 @@ def my_exe_get_install_path(NAME):
            'KEY':'UV4',
            'FATHER':0,
            'TITLE':'请选择 Keil4 的可执行文件 "UV4.exe"'
+        },
+        '$IAR_PATH':{
+           'PATH':'D:/Program Files (x86)/IAR Systems/Embedded Workbench 8.3/common/bin',
+           'KEY':'IAR',
+           'FATHER':0,
+           'TITLE':'请选择 IAR 的可执行文件 "IarBuild.exe"'
         }
         #,
         #'$CMSIS_VER':{
