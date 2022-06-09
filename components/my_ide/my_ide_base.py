@@ -103,7 +103,7 @@ class my_ide_base(object):
         my_file_clear_folder(self.output['path']) 
         
         print('#1. Create Output Package...')
-        template_dir    = my_ide_base_file_dir+'/../../template'
+        template_dir    = my_ide_base_file_dir+'/../my_template/app'
         
         output_path     = self.output['path']
         vendor_name     = self.output['vendor']
@@ -141,8 +141,7 @@ class my_ide_base(object):
                                project_root+'/LICENSE',
                                project_root+'/README.md',
                                project_root+'/RELEASE.md',
-                               template_dir+'/sdk/build_app.py'],output_path)
-        my_file_copy_files_to([template_dir+'/sdk/pre_build.py'],scripts_path)
+                               template_dir+'/build_app.py'],output_path)
     
         print('#2. Create include/base  include/vendor/adapter...')        
         adapters = my_file_find_subdir_in_path(adapter_root)

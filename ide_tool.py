@@ -8,6 +8,12 @@ current_file_dir = os.path.dirname(__file__)  # 当前文件所在的目录
 if current_file_dir == '':
     current_file_dir = '.'
 sys.path.append(current_file_dir+'/components')
+from my_depend.my_depend import my_depend
+depend = my_depend()
+depend.check()
+
+from my_template.my_template import my_template
+from my_kconfig.my_kconfig import my_kconfig
 from my_ide.my_ide_gcc import *
 from my_ide.my_ide_keil import *
 from my_ide.my_ide_cdk import *
@@ -37,17 +43,23 @@ def ide_tool_back(OP,JSON_FILE,KIND='gcc'):
     elif OP == 'flash_all':
        ide.tflash('flash_all')        
 
+def ide_tool_check(project_path):
+    template = my_template(project_path)
+    template.check()
+
 def ide_tool_help():
     print("[error] input error")
 
-
+ide_tool_check('./')
 if __name__ == '__main__':
     PARAMS_NUM = len(sys.argv)-1
     if PARAMS_NUM == 0:
         ide_tool_help()
     else:
         OP = sys.argv[1]
-        if (OP == 'front') and (PARAMS_NUM == 7):
+        if (OP == 'menuconfig') and (PARAMS_NUM == 5):
+            my_kconfig(sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5]) 
+        elif (OP == 'front') and (PARAMS_NUM == 7):
             ide_tool_front(sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6],sys.argv[7])
         elif (OP == 'build' or OP == 'sdk' or OP == 'flash_user' or OP == 'flash_all') and (PARAMS_NUM == 2):
             ide_tool_back(sys.argv[1],sys.argv[2])

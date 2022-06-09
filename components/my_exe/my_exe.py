@@ -36,10 +36,14 @@ def my_exe_get_system_kind():
     return platform.system().lower()
 
 def my_exe_add_env_path(PATH):
-    if my_exe_get_system_kind() == 'windows':
-        return {**os.environ, 'PATH': PATH + ';' + os.environ['PATH']}
+    # https://blog.51cto.com/alsww/1787848
+    if isinstance(PATH,dict):
+        return {**os.environ,**PATH} 
     else:
-        return {**os.environ, 'PATH': PATH + ':' + os.environ['PATH']}
+        if my_exe_get_system_kind() == 'windows':
+            return {**os.environ, 'PATH': PATH + ';' + os.environ['PATH']}
+        else:
+            return {**os.environ, 'PATH': PATH + ':' + os.environ['PATH']}
 
 def my_exe_get_install_path(NAME):
     EXE_TOOL = {
