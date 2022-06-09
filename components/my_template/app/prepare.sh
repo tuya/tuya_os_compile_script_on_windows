@@ -22,6 +22,8 @@ echo APP_NAME=$APP_NAME
 embcli update --pn $APP_NAME || exit 2
 
 # 移动tuyaos开发框架到根目录
-cp ./TuyaOS/* ./ -rf
+cp ./TuyaOS/include ./ -rf
+cp ./TuyaOS/libs ./ -rf
+cp ./TuyaOS/components ./ -rf
 rm ./TuyaOS -rf
 
