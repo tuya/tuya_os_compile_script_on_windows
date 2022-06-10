@@ -2,7 +2,11 @@
 # coding=utf-8
 import os 
 import sys
-import xml.etree.ElementTree as ET 
+import subprocess
+import xml.etree.ElementTree as ET
+ 
+sys.path.append('..')
+from my_exe.my_exe import my_exe_get_install_path
 
 # 用于形成，根据编译调节 scatter 文件的类
 class my_file_scatter:
@@ -109,6 +113,7 @@ class my_file_scatter:
             if Files != None:
                 for File in Files:
                     FileName = File.find("FileName")
+                    FilePath = File.find("FilePath")
                     
                     if GroupName.text == None:
                         pass
@@ -117,7 +122,19 @@ class my_file_scatter:
                         GroupName.text.startswith('tkl/') == True:
                         insert.append('	' + os.path.splitext(FileName.text)[0] + '.o (+RO)\n')
                     elif GroupName.text == 'libs/libs':
-                        insert.append('	' + os.path.splitext(FileName.text)[0] + '.lib (+RO)\n')
+                        # insert.append('	' + os.path.splitext(FileName.text)[0] + '.lib (+RO)\n')
+                        uvprojx_path = os.path.dirname(uvprojx_file)
+                        lib_path = uvprojx_path + '/' + FilePath.text
+                        KEIL_PATH = my_exe_get_install_path('$KEIL_PATH')   
+                      
+                        cmd = KEIL_PATH + '/ARM/ARMCC/bin/armar.exe -t ' + lib_path  
+                        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+                        r = p.stdout.read().decode()
+                        
+                        for o_file in r.split('\r\n'):
+                            #print(o_file)
+                            if o_file != '':
+                                insert.append('	' + o_file + ' (+RO)\n')
         
         start = self.__find_str_line_num("SCATTER_XIP_FILE")
         with open(self.SCT_FILE,'r') as sct:
