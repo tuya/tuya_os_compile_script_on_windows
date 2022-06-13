@@ -5,8 +5,8 @@ import platform
 import tkinter
 from tkinter import Label, Button, filedialog
 
-current_file_dir = os.path.dirname(__file__)  # 当前文件所在的目录
-sys.path.append(current_file_dir+'/../components')
+my_exe_file_dir = os.path.dirname(__file__)  # 当前文件所在的目录
+sys.path.append(my_exe_file_dir+'/../components')
 from my_string.my_string import my_string_replace_with_dict
 
 
@@ -27,7 +27,7 @@ def my_exe_simple(cmd,wait=0,my_env=None,var_map=None):
         dev.wait()
 
 def my_exe_make(cmd,wait=0):
-    toolchain_path = current_file_dir
+    toolchain_path = my_exe_file_dir
     toolchain_path = toolchain_path + '/' + my_exe_get_system_kind()
         
     my_exe_simple(cmd,wait,toolchain_path)   
@@ -45,6 +45,15 @@ def my_exe_add_env_path(PATH):
         else:
             return {**os.environ, 'PATH': PATH + ':' + os.environ['PATH']}
 
+def __my_exe_check_version(file,strlist):
+    ret = {}
+    with open(file,'r') as fp:
+        contents = fp.read()
+        for str in strlist:
+            ret[str] = (len(contents) - len(contents.replace(str,''))) // len(str)
+        fp.close()
+    return ret
+    
 def my_exe_get_install_path(NAME):
     EXE_TOOL = {
         '$KEIL_PATH':{
@@ -62,7 +71,7 @@ def my_exe_get_install_path(NAME):
         '$KEIL4_PATH':{
            'PATH':'D:/keil 4',
            'KEY':'UV4',
-           'FATHER':0,
+           'FATHER':1,
            'TITLE':'请选择 Keil4 的可执行文件 "UV4.exe"'
         },
         '$IAR_PATH':{
@@ -85,8 +94,21 @@ def my_exe_get_install_path(NAME):
     if not os.path.exists(EXE_PATH):
         for evn in os.environ.get("TUYAOS_COMPILE_TOOL").split(';'):
             if EXE_TOOL[NAME]['KEY'] in evn:
-                EXE_PATH = os.path.abspath(os.path.join(evn,'../'*EXE_TOOL[NAME]['FATHER'])).replace('\\','/')
-                break
+                PATH = os.path.abspath(os.path.join(evn,'../'*EXE_TOOL[NAME]['FATHER'])).replace('\\','/')
+            
+                OK = True
+                if NAME == '$KEIL4_PATH':
+                    ret = __my_exe_check_version(PATH + '/TOOLS.INI',['VERSION=4.'])
+                    if ret['VERSION=4.'] == 0:
+                        OK = False
+                elif NAME == '$KEIL4_PATH':
+                    ret = __my_exe_check_version(PATH + '/TOOLS.INI',['VERSION=5.'])
+                    if ret['VERSION=5.'] == 0:
+                        OK = False
+                        
+                if OK:
+                    EXE_PATH = PATH
+                    break
                 
     if not os.path.exists(EXE_PATH):
         TITLE = EXE_TOOL[NAME]['TITLE']

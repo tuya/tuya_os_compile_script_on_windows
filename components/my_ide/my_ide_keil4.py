@@ -34,7 +34,7 @@ class my_ide_keil4(my_ide_base):
         print('\nBUILD')
         
         # 是否需要动态调节 scatter file
-        if self.cmd['scatter_file']['auto_adjust'] == '1':
+        if self.cmd.__contains__('scatter_file') and self.cmd['scatter_file']['auto_adjust'] == '1':
             sct = my_file_scatter('.log/Demo.uvproj', '.log/'+self.cmd['scatter_file']['path'], '.log/'+self.cmd['log_file'])
             sct.build_with_scatter_adjust(self.__build_keil)
         else:
@@ -191,7 +191,7 @@ class my_ide_keil4(my_ide_base):
     def __show_keil_log(self,log_file_path):
         while 1<2:
             time.sleep(0.5)
-            if os.path.exists(log_file_path):
+            if os.path.exists(log_file_path) and os.path.isfile(log_file_path):
                 line_num = sum(1 for line in open(log_file_path))
                 if line_num > self.counter:
                     with open(log_file_path, "r") as fp:
@@ -204,12 +204,12 @@ class my_ide_keil4(my_ide_base):
     
     # KEIL BUILD
     def __build_keil(self):
-        cmd = 'UV4.exe -j0 -b ./.log/Demo.uvproj'
+        cmd = 'UV4.exe -j0 -b ./.log/Demo.uvproj -o Demo.log'
         print('> [cmd]:'+cmd)
         print('> wait about 2 min ...')
         try:
             self.counter = 0
-            t1 = threading.Thread(target = self.__show_keil_log, args = ('.log/'+self.cmd['log_file'],))
+            t1 = threading.Thread(target = self.__show_keil_log, args = ('./.log/Demo.log',))
             t1.setDaemon(True)
             t1.start()
         except e:
