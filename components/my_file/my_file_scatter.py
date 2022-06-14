@@ -107,6 +107,8 @@ class my_file_scatter:
         tree = ET.parse(uvprojx_file)
         root = tree.getroot()
         Groups = root.find("Targets").find("Target").find("Groups")
+        KEIL_PATH = my_exe_get_install_path('$KEIL_PATH') 
+        
         for Group in Groups:
             GroupName = Group.find("GroupName")
             Files = Group.find("Files")
@@ -125,9 +127,8 @@ class my_file_scatter:
                         # insert.append('	' + os.path.splitext(FileName.text)[0] + '.lib (+RO)\n')
                         uvprojx_path = os.path.dirname(uvprojx_file)
                         lib_path = uvprojx_path + '/' + FilePath.text
-                        KEIL_PATH = my_exe_get_install_path('$KEIL_PATH')   
-                      
-                        cmd = KEIL_PATH + '/ARM/ARMCC/bin/armar.exe -t ' + lib_path  
+                          
+                        cmd = '"' + KEIL_PATH + '/ARM/ARMCC/bin/armar.exe" -t ' + lib_path 
                         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
                         r = p.stdout.read().decode()
                         
