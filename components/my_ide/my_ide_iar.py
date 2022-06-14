@@ -21,7 +21,7 @@ from my_exe.my_exe import my_exe_simple, my_exe_get_install_path
 
 class my_ide_iar(my_ide_base):
     ide_kind = 'iar'
-    uvprojx_path = ''
+    ewp_path = ''
     uv4_path = ''
     insert_group_num = 0   
     counter = 0
@@ -60,21 +60,21 @@ class my_ide_iar(my_ide_base):
             if k in libs:
                 print('    ->[Y]',k)
                 # create lib
-                cur_lib = '../'+libs_path+'/lib'+k+'.lib' 
+                cur_lib = '$PROJ_DIR$\\..\\'+libs_path+'\\lib'+k+'.a' 
                 
-                sdk_uvprojx_path = '../.log/SdkDemo.uvprojx'
-                my_file_copy_file_to_file('../.log/Demo.uvprojx',sdk_uvprojx_path)
+                sdk_ewp_path = '../.log/SdkDemo.ewp'
+                my_file_copy_file_to_file('../.log/Demo.ewp',sdk_ewp_path)
 
                 # print('    ->[LIB]:',cur_lib)
-                self.__delete_group_in_iar(sdk_uvprojx_path)
-                self.__insert_file_to_iar(sdk_uvprojx_path,'.c',v['c_files'],'sdk')
-                self.__insert_file_to_iar(sdk_uvprojx_path,'.h',v['h_dir'],'')
-                self.__make_iar_output_lib(sdk_uvprojx_path,cur_lib)
+                self.__delete_group_in_iar(sdk_ewp_path)
+                self.__insert_file_to_iar(sdk_ewp_path,'.c',v['c_files'],'sdk')
+                self.__insert_file_to_iar(sdk_ewp_path,'.h',v['h_dir'],'')
+                self.__make_iar_output_lib(sdk_ewp_path,cur_lib)
                 
-                cmd = 'UV4.exe -j0 -b SdkDemo.uvprojx'
+                cmd = 'IarBuild.exe SdkDemo.ewp -build * -log errors'
                 my_exe_simple(cmd,1,self.uv4_path,None)
                 
-                my_file_rm_file(sdk_uvprojx_path)
+                my_file_rm_file(sdk_ewp_path)
                 
                 # copy .h to include
                 my_file_copy_one_kind_files_to(v['h_dir'],'.h','../'+incs_path+'/components/'+k+'/include') 
@@ -88,7 +88,7 @@ class my_ide_iar(my_ide_base):
         # 清除掉生成 lib 时产生的中间文件
         for root, dirs, files in os.walk('../'+libs_path):
             for file in files:
-                if not file.endswith('.lib'):
+                if not file.endswith('.a'):
                     my_file_rm_file(os.path.join(root,file))
             break        
         
@@ -99,61 +99,54 @@ class my_ide_iar(my_ide_base):
         if len(LIST) == 0:
             return
         
-        if self.uvprojx_path == '':
+        if self.ewp_path == '':
             # copy iar to output
             iar_path         =  self.cmd['bin_path'][1:] # ../vendor -> ./vendor
             build_path        =  '.log'
             my_file_copy_dir_contents_to(iar_path,build_path)
         
-            self.uvprojx_path =  build_path+'/Demo.ewp' 
+            self.ewp_path =  build_path+'/Demo.ewp' 
 
-        self.__insert_file_to_iar(self.uvprojx_path,KIND,LIST,GROUP_NAME)
+        self.__insert_file_to_iar(self.ewp_path,KIND,LIST,GROUP_NAME)
        
        
     ###########################################################
     # IAR 操作内部函数
     ###########################################################
     # 将 iar 工程中的 Groups 下增加的 .c、.lib 全部删除
-    def __delete_group_in_iar(self,uvprojx_path):
-        tree = ET.parse(uvprojx_path)
+    def __delete_group_in_iar(self,ewp_path):
+        tree = ET.parse(ewp_path)
         root = tree.getroot()
         
-        Groups = root.find("Targets").find("Target").find("Groups")
-        Groups.clear()
+        for ele in root.findall('group'):
+            root.remove(ele)
         
         ET.indent(tree) # format        
-        tree.write(uvprojx_path, encoding='utf-8', xml_declaration=True)
+        tree.write(ewp_path, encoding='utf-8', xml_declaration=True)
         
-    # 将 iar 工程切换为输出 lib 库模式
-    def __make_iar_output_lib(self,uvprojx_path,output_lib):
-        tree = ET.parse(uvprojx_path)
+    def __set_element(self, ewp_path, name_text, state_text):
+        tree = ET.parse(ewp_path)
         root = tree.getroot()
-        
-        TargetCommonOption = root.find("Targets").find("Target").find("TargetOption").find("TargetCommonOption")
-        
-        AfterMake = TargetCommonOption.find("AfterMake")
-        RunUserProg1 = AfterMake.find("RunUserProg1")
-        RunUserProg2 = AfterMake.find("RunUserProg2")
 
-        RunUserProg1.text = '0'
-        RunUserProg2.text = '0'
-        
-        CreateExecutable = TargetCommonOption.find("CreateExecutable")
-        CreateLib = TargetCommonOption.find("CreateLib")
-        OutputDirectory = TargetCommonOption.find("OutputDirectory")
-        OutputName = TargetCommonOption.find("OutputName")
-        
-        CreateExecutable.text = '0'
-        CreateLib.text = '1'   
-        OutputDirectory.text = os.path.dirname(output_lib).replace('/','\\')+'\\'
-        OutputName.text = os.path.basename(output_lib)
-        
-        ET.indent(tree) # format
-        tree.write(uvprojx_path, encoding='utf-8', xml_declaration=True)
+        for ele in root.find('configuration').iter("option"):
+            name = ele.find('name')
+            if name != None and name.text == name_text:
+                state = ele.find('state')
+                state.text = state_text
+
+                ET.indent(tree) # format
+                tree.write(ewp_path, encoding='utf-8', xml_declaration=True)
+                return
+    
+    # 将 iar 工程切换为输出 lib 库模式
+    def __make_iar_output_lib(self,ewp_path,output_lib):
+        self.__set_element(ewp_path, 'GOutputBinary', '1')
+        self.__set_element(ewp_path, 'IarchiveOutput', output_lib.replace('/','\\'))
+                
     
     # 将相应文件插入到 iar 工程
-    def __insert_file_to_iar(self,uvprojx_path,KIND,LIST,GROUP_NAME):
-        tree = ET.parse(uvprojx_path)
+    def __insert_file_to_iar(self,ewp_path,KIND,LIST,GROUP_NAME):
+        tree = ET.parse(ewp_path)
         root = tree.getroot()
 
         if KIND == '.c' or KIND == '.lib' or KIND == '.s' or KIND == '.a':
@@ -171,7 +164,7 @@ class my_ide_iar(my_ide_base):
                     file_name.text = '$PROJ_DIR$/' + file_dir
             
             ET.indent(tree) # format
-            tree.write(uvprojx_path, encoding='utf-8', xml_declaration=True)
+            tree.write(ewp_path, encoding='utf-8', xml_declaration=True)
 
         elif KIND == '.h':
             for ele in root.find('configuration').iter("option"):
@@ -182,7 +175,7 @@ class my_ide_iar(my_ide_base):
                         state.text = '$PROJ_DIR$/' + path
                     
                     ET.indent(tree) # format
-                    tree.write(uvprojx_path, encoding='utf-8', xml_declaration=True)
+                    tree.write(ewp_path, encoding='utf-8', xml_declaration=True)
                     break
 
         else:
