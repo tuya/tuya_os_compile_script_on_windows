@@ -12,7 +12,7 @@ from my_kconfig.menuconfig import menuconfig
 from my_kconfig.conf2h import conf2h
 
 
-def my_kconfig(project_path,app_path,fw_name,fw_version):
+def my_kconfig(project_path,app_path,fw_name,fw_version,board_name):
     print('INPUT:\n\
     -------------------------------------\n\
     project_path:     %s\n\
@@ -74,7 +74,7 @@ def my_kconfig(project_path,app_path,fw_name,fw_version):
 
     # -----------------------------------------------------------------------------------------------
     print('Create :')
-    conf2h(CONFIG_FILE,HEAD_FILE,fw_name,fw_version)    
+    conf2h(CONFIG_FILE,HEAD_FILE,fw_name,fw_version,board_name)    
 
 
 

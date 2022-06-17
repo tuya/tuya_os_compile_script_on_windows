@@ -54,7 +54,7 @@ def exe(note,cmd):
         sys.exit(1)
 
 if BUILD_COMMAND == "config":
-    cmd = "%s menuconfig \"%s\" \"%s\" \"%s\" \"%s\""%(SCRIPT_IDE_TOOL, './', DEMO_PATH, DEMO_NAME, DEMO_FIRMWARE_VERSION)
+    cmd = "%s menuconfig \"%s\" \"%s\" \"%s\" \"%s\" \"%s\""%(SCRIPT_IDE_TOOL, './', DEMO_PATH, DEMO_NAME, DEMO_FIRMWARE_VERSION, BOARD_NAME)
     exe("config...", cmd)
 
 if BUILD_COMMAND == "build":
