@@ -834,22 +834,15 @@ def _menuconfig(stdscr):
 
         c = _getch_compat(_menu_win)
 
-        # tuya start
-        # Adapt up and down key
-        if c==450:
-            _select_prev_menu_entry()
-
-        if c==456:
-            _select_next_menu_entry()
-        # tuya end
-
         if c == curses.KEY_RESIZE:
             _resize_main()
 
-        elif c in (curses.KEY_DOWN, "j", "J"):
+        # tuya
+        elif c in (curses.KEY_DOWN, "j", "J", 456):
             _select_next_menu_entry()
 
-        elif c in (curses.KEY_UP, "k", "K"):
+        # tuya
+        elif c in (curses.KEY_UP, "k", "K", 450):
             _select_prev_menu_entry()
 
         elif c in (curses.KEY_NPAGE, "\x04"):  # Page Down/Ctrl-D
@@ -874,7 +867,8 @@ def _menuconfig(stdscr):
             if not _change_node(sel_node):
                 _enter_menu(sel_node)
 
-        elif c in (curses.KEY_RIGHT, "\n", "l", "L"):
+        # tuya
+        elif c in (curses.KEY_RIGHT, "\n", "l", "L", 454):
             # Enter the node if possible
             sel_node = _shown[_sel_node_i]
             if not _enter_menu(sel_node):
@@ -889,8 +883,9 @@ def _menuconfig(stdscr):
         elif c in ("y", "Y"):
             _set_sel_node_tri_val(2)
 
+        # tuya
         elif c in (curses.KEY_LEFT, curses.KEY_BACKSPACE, _ERASE_CHAR,
-                   "\x1B", "h", "H"):  # \x1B = ESC
+                   "\x1B", "h", "H", 452):  # \x1B = ESC
 
             if c == "\x1B" and _cur_menu is _kconf.top_node:
                 res = _quit_dialog()
