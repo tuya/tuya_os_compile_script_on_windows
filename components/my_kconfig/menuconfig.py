@@ -834,6 +834,15 @@ def _menuconfig(stdscr):
 
         c = _getch_compat(_menu_win)
 
+        # tuya start
+        # Adapt up and down key
+        if c==450:
+            _select_prev_menu_entry()
+
+        if c==456:
+            _select_next_menu_entry()
+        # tuya end
+
         if c == curses.KEY_RESIZE:
             _resize_main()
 
