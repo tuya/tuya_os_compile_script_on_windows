@@ -137,6 +137,9 @@ class my_ide_base(object):
         for subdir in unzip_dir:
             my_file_rm_dir(software_path+subdir)
         
+        # 删除 vendor 中的 .git
+        my_file_rm_dir(vendor_path+'/'+vendor_name+'/.git')
+        
         my_file_copy_files_to([project_root+'/CHANGELOG.md',
                                project_root+'/LICENSE',
                                project_root+'/README.md',
