@@ -18,7 +18,7 @@ if len(sys.argv) < 4:
     print("Script parameter error !!!")
 
 # Get the path to the current python interpreter
-PYTHON_PATH = sys.executable
+PYTHON_PATH = '"'+sys.executable+'"'
 
 DEMO_PATH = sys.argv[1]
 DEMO_NAME = sys.argv[2]
