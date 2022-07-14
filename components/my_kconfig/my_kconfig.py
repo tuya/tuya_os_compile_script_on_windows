@@ -64,7 +64,7 @@ def my_kconfig(project_path,app_path,fw_name,fw_version,board_name):
     # -----------------------------------------------------------------------------------------------
     print('SHOW MenuConfig:')
     # Get the path to the current python interpreter
-    PYTHON_PATH = sys.executable
+    PYTHON_PATH = '"'+sys.executable+'"'
    
 
     cmd = PYTHON_PATH + ' ' + my_kconfig_dir + '/menuconfig.py ' + KCONFIG_FILE

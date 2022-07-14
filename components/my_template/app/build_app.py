@@ -42,7 +42,7 @@ print("DEMO_FIRMWARE_VERSION: " + DEMO_FIRMWARE_VERSION)
 print("BOARD_NAME: " + BOARD_NAME)
 print("BUILD_COMMAND: " + BUILD_COMMAND)
 
-PYTHON_PATH     = sys.executable
+PYTHON_PATH     = '"'+sys.executable+'"'
 SCRIPT_IDE_TOOL = PYTHON_PATH + ' ./.ide_tool/ide_tool.py'
 SCRIPT_PREPARE  = PYTHON_PATH + ' ./vendor/'+BOARD_NAME+'/prepare.py'
 
