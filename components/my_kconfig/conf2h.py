@@ -9,6 +9,7 @@ def __version_string_to_hex(version,kind=None):
     version_int = 0
     nums = version.split('.')[::-1]
     if kind == 'mesh':
+        nums = nums[::-1] 
         idx = 0
         while idx < len(nums):
             version_int |= ord(nums[idx]) << (idx*8)
