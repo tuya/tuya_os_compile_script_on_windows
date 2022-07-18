@@ -92,11 +92,12 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
     json_root['adapter'] = my_file_create_subgroup(ADAPTER_PATH,filter=".h")
 
 
-    print('    -> vendor/'+vendor_name+'/tkl\n        -> drivers\n        -> system\n        -> utilities\n        -> bluetooth\n        -> security\n        -> include')
+    print('    -> vendor/'+vendor_name+'/tkl\n        -> drivers\n        -> system\n        -> utilities\n        -> bluetooth\n        -> zigbee\n        -> security\n        -> include')
     json_root['tkl']['drivers'] = my_file_create_subgroup(VENDOR_PATH+"/tuyaos/drivers")
     json_root['tkl']['system'] = my_file_create_subgroup(VENDOR_PATH+"/tuyaos/system")
     json_root['tkl']['utilities'] = my_file_create_subgroup(VENDOR_PATH+"/tuyaos/utilities")
     json_root['tkl']['bluetooth'] = my_file_create_subgroup(VENDOR_PATH+"/tuyaos/bluetooth")
+    json_root['tkl']['zigbee'] = my_file_create_subgroup(VENDOR_PATH+"/tuyaos/zigbee")
     json_root['tkl']['security'] = my_file_create_subgroup(VENDOR_PATH+"/tuyaos/security")
     json_root['tkl']['include'] = my_file_create_subgroup(VENDOR_PATH+"/tuyaos/include")
 
