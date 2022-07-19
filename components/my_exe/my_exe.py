@@ -92,24 +92,26 @@ def my_exe_get_install_path(NAME):
     # Get the keil path
     EXE_PATH=EXE_TOOL[NAME]['PATH']
     if not os.path.exists(EXE_PATH):
-        for evn in os.environ.get("TUYAOS_COMPILE_TOOL").split(';'):
-            if EXE_TOOL[NAME]['KEY'] in evn:
-                PATH = os.path.abspath(os.path.join(evn,'../'*EXE_TOOL[NAME]['FATHER'])).replace('\\','/')
-            
-                OK = True
-                if NAME == '$KEIL4_PATH':
-                    ret = __my_exe_check_version(PATH + '/TOOLS.INI',['VERSION=4.'])
-                    if ret['VERSION=4.'] == 0:
-                        OK = False
-                elif NAME == '$KEIL4_PATH':
-                    ret = __my_exe_check_version(PATH + '/TOOLS.INI',['VERSION=5.'])
-                    if ret['VERSION=5.'] == 0:
-                        OK = False
-                        
-                if OK:
-                    EXE_PATH = PATH
-                    break
+        evns = os.environ.get("TUYAOS_COMPILE_TOOL")
+        if None != evns:
+            for evn in evns.split(';'):
+                if EXE_TOOL[NAME]['KEY'] in evn:
+                    PATH = os.path.abspath(os.path.join(evn,'../'*EXE_TOOL[NAME]['FATHER'])).replace('\\','/')
                 
+                    OK = True
+                    if NAME == '$KEIL4_PATH':
+                        ret = __my_exe_check_version(PATH + '/TOOLS.INI',['VERSION=4.'])
+                        if ret['VERSION=4.'] == 0:
+                            OK = False
+                    elif NAME == '$KEIL4_PATH':
+                        ret = __my_exe_check_version(PATH + '/TOOLS.INI',['VERSION=5.'])
+                        if ret['VERSION=5.'] == 0:
+                            OK = False
+                            
+                    if OK:
+                        EXE_PATH = PATH
+                        break
+                    
     if not os.path.exists(EXE_PATH):
         TITLE = EXE_TOOL[NAME]['TITLE']
         window = tkinter.Tk()
