@@ -17,8 +17,8 @@ print(len(sys.argv))
 if len(sys.argv) < 4:
     print("Script parameter error !!!")
 
-DEMO_PATH = sys.argv[1]
-DEMO_NAME = sys.argv[2]
+DEMO_PATH = sys.argv[1].replace('\\','/')
+DEMO_NAME = sys.argv[2].replace('\\','/')
 DEMO_FIRMWARE_VERSION = sys.argv[3]
 DEMO_OUTPUT_PATH = "_output"
 
