@@ -22,6 +22,9 @@ from my_ide.my_ide_iar import *
 from my_ide.my_ide_front import my_ide_front
 
 def ide_tool_front(project_path,app_path,vendor_name,output_path,firmware_name,firmware_version):
+    # 编译基线的时候，不自动运行 my_kconfig，因为基线的 tuya_iot.config 已经从云端生成了
+    if os.path.basename(os.path.dirname(app_path)) == 'apps': 
+        my_kconfig('./',app_path,firmware_name,firmware_version,vendor_name,1) 
     my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,firmware_version)
 
 def ide_tool_back(OP,JSON_FILE,KIND='gcc'):    
