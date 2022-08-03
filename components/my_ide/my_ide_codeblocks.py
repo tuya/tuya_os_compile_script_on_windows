@@ -48,7 +48,7 @@ class my_ide_codeblocks(my_ide_base):
             if k in libs:
                 print('    ->[Y]',k)
                 # create lib
-                cur_lib = '../'+libs_path+'/lib'+k+'.lib' 
+                cur_lib = '../'+libs_path+'/lib'+k+'.a' 
                 
                 sdk_codeblocks_path = '../.log/SdkDemo.cbp'
                 my_file_copy_file_to_file('../.log/Demo.cbp',sdk_codeblocks_path)
@@ -76,7 +76,7 @@ class my_ide_codeblocks(my_ide_base):
         # 清除掉生成 lib 时产生的中间文件
         for root, dirs, files in os.walk('../'+libs_path):
             for file in files:
-                if not file.endswith('.lib'):
+                if not file.endswith('.a'):
                     my_file_rm_file(os.path.join(root,file))
             break        
         
