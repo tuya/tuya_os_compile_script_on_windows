@@ -79,7 +79,13 @@ def my_exe_get_install_path(NAME):
            'KEY':'IAR',
            'FATHER':0,
            'TITLE':'请选择 IAR 的可执行文件 "IarBuild.exe"'
-        }
+        },
+        '$CODEBLOCKS_PATH':{
+           'PATH':'C:/Program Files (x86)/CodeBlocks',
+           'KEY':'CodeBlocks',
+           'FATHER':0,
+           'TITLE':'请选择 CodeBlocks 的可执行文件 "codeblocks.exe"'
+        },
         #,
         #'$CMSIS_VER':{
         #   'PATH':'C:/Keil_v5',

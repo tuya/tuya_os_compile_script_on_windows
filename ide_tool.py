@@ -17,6 +17,7 @@ from my_kconfig.my_kconfig import my_kconfig
 from my_ide.my_ide_gcc import *
 from my_ide.my_ide_keil import *
 from my_ide.my_ide_cdk import *
+from my_ide.my_ide_codeblocks import *
 from my_ide.my_ide_keil4 import *
 from my_ide.my_ide_iar import *
 from my_ide.my_ide_front import my_ide_front
@@ -34,6 +35,8 @@ def ide_tool_back(OP,JSON_FILE,KIND='gcc'):
         ide = my_ide_keil(JSON_FILE)
     elif KIND == 'cdk':
         ide = my_ide_cdk(JSON_FILE)
+    elif KIND == 'codeblocks':
+        ide = my_ide_codeblocks(JSON_FILE)
     elif KIND == 'keil4':
         ide = my_ide_keil4(JSON_FILE)
     elif KIND == 'iar':
