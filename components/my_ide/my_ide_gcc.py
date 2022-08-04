@@ -38,7 +38,10 @@ class my_ide_gcc(my_ide_base):
             print("[cc] %s"%(s_file))
             
         self.var_map['$O_FILES'] = ' '.join(my_file_find_files_in_paths([log_path],'.o'))
-        
+        gcc_o_file=log_path+'/'+'gcc_o.txt'
+        Note=open(gcc_o_file,mode='w')
+        Note.write(self.var_map['$O_FILES'])
+        Note.close()
         # ld
         cmd = self.cmd['ld'];
         print("\n[ld] %s"%(cmd))
@@ -107,7 +110,12 @@ class my_ide_gcc(my_ide_base):
         o_file = out_path+'/'+os.path.splitext(os.path.basename(file))[0]+'.o'
         
         if kind == '.c':
-            cmd = "%s %s %s -c %s -o %s %s"%(cc,c_flags,self.src['h_dir_str'],file,o_file,c_macros)
+            gcc_h_file = out_path+'/'+'gcc_h.txt'
+            Note=open(gcc_h_file,mode='w')
+            Note.write(self.src['h_dir_str'])
+            Note.close()
+
+            cmd = "%s %s @%s -c %s -o %s %s"%(cc,c_flags,gcc_h_file,file,o_file,c_macros)
         elif kind == '.s':
             cmd = "%s %s -c %s -o %s"%(asm,s_flags,file,o_file)
             
