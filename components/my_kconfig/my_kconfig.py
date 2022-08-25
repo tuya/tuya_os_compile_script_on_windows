@@ -13,6 +13,9 @@ from my_kconfig.conf2h import conf2h
 
 
 def my_kconfig(project_path,app_path,fw_name,fw_version,board_name,auto=0):
+    project_path = project_path.replace('\\','/')
+    app_path = app_path.replace('\\','/')
+
     print('\nMY KCONFIG------------------------')
     print('INPUT:\n\
     -------------------------------------\n\
