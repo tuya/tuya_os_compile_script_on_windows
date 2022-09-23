@@ -100,6 +100,31 @@ class my_ide_gcc(my_ide_base):
                 my_file_copy_one_kind_files_to(v['h_dir'],'.h', comp_path+'/'+k+'/include')
 
 
+    def if_need_rebuild(self,dep_file):
+        with open(dep_file,"r") as f:
+            list_line1 = f.readline().split(' ')
+            if(list_line1[1] != '\\\n'):
+                try:
+                    if(os.path.getmtime(list_line1[1]) > os.path.getmtime(dep_file)):
+                        return True
+                except:
+                    return True
+            for line in f.readlines():
+                line = line.lstrip()
+                line = line.strip('\n')
+                list_n = line.split(' ')
+                for file in list_n:
+                    if(file == '\\'):
+                        break
+                    try:
+                        if(os.path.getmtime(file) > os.path.getmtime(dep_file)):
+                            return True
+                    except:
+                        print("file not exit")
+                        return True
+        return False
+
+
     def __compile(self,kind,file,out_path,evn):
         cc = self.cmd['gcc']['cc']
         asm = self.cmd['gcc']['asm']
@@ -108,6 +133,7 @@ class my_ide_gcc(my_ide_base):
         s_flags = self.cmd['gcc']['s_flags']
         
         o_file = out_path+'/'+os.path.splitext(os.path.basename(file))[0]+'.o'
+        d_file = o_file+'.d'
         
         if kind == '.c':
             gcc_h_file = out_path+'/'+'gcc_h.txt'
@@ -115,7 +141,11 @@ class my_ide_gcc(my_ide_base):
             Note.write(self.src['h_dir_str'])
             Note.close()
 
-            cmd = "%s %s @%s -c %s -o %s %s"%(cc,c_flags,gcc_h_file,file,o_file,c_macros)
+            if((os.path.exists(d_file) == True) and (self.if_need_rebuild(d_file) == False)):
+                return o_file
+            if (os.path.exists(o_file)):
+                my_file_rm_file(o_file)
+            cmd = "%s %s @%s -c %s -o %s %s -MMD -MF %s"%(cc,c_flags,gcc_h_file,file,o_file,c_macros, d_file)
         elif kind == '.s':
             cmd = "%s %s -c %s -o %s"%(asm,s_flags,file,o_file)
             

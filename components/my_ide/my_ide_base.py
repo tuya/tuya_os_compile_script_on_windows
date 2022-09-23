@@ -29,7 +29,18 @@ class my_ide_base(object):
     def tmake(self,offset='.'):
         print('\nMAKE')
         print('> clean .log \n> copy json_file to .log')
-        my_file_clear_folder(self.__log_path)
+
+        if self.ide_kind != 'gcc':
+            my_file_clear_folder(self.__log_path)
+        else:
+            with open(self.json_file,'r') as load_f:
+                load_dict = json.load(load_f)
+                self.output = load_dict['output']
+                for k in load_dict['tool']['gcc']['output']:
+                    fw = './.log/'+load_dict['tool']['gcc']['output'][k]
+                    if os.path.exists(fw):
+                        os.remove(fw)
+
         my_file_copy_files_to([self.json_file],self.__log_path)
         self.json_file = self.__log_path+'/'+os.path.basename(self.json_file)
         my_file_str_replace(self.json_file,'$PROJECT_ROOT',offset)#PROJECT_PATH
@@ -205,6 +216,8 @@ class my_ide_base(object):
                         continue
                     elif k == 'components':
                         group_name = 'comp'
+                    elif k == 'application_components':
+                        group_name = 'app_comp'
                     else:
                         group_name = k
                 else:

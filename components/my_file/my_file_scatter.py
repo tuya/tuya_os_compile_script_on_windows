@@ -121,6 +121,7 @@ class my_file_scatter:
                         pass
                     elif GroupName.text == 'app' or \
                         GroupName.text.startswith('comp/') == True or \
+                        GroupName.text.startswith('app_comp/') == True or \
                         GroupName.text.startswith('tkl/') == True:
                         insert.append('	' + os.path.splitext(FileName.text)[0] + '.o (+RO)\n')
                     elif GroupName.text == 'libs/libs':
