@@ -30,16 +30,16 @@ class my_ide_base(object):
         print('\nMAKE')
         print('> clean .log \n> copy json_file to .log')
 
-        with open(self.json_file,'r') as load_f:
-            load_dict = json.load(load_f)
-            tool = load_dict['tool'][self.ide_kind]
-            if tool == 'gcc':
-                my_file_clear_folder(self.__log_path)
-            else:
-                for root, dirs, files in os.walk(self.__log_path):
-                    for name in files:
-                        if name.endswith(".bin"):
-                            os.remove(os.path.join(root, name))
+        if self.ide_kind != 'gcc':
+            my_file_clear_folder(self.__log_path)
+        else:
+            with open(self.json_file,'r') as load_f:
+                load_dict = json.load(load_f)
+                self.output = load_dict['output']
+                for k in load_dict['tool']['gcc']['output']:
+                    fw = './.log/'+load_dict['tool']['gcc']['output'][k]
+                    if os.path.exists(fw):
+                        os.remove(fw)
 
         my_file_copy_files_to([self.json_file],self.__log_path)
         self.json_file = self.__log_path+'/'+os.path.basename(self.json_file)
