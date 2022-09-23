@@ -158,6 +158,7 @@ def my_file_create_subgroup(SOURCES_ROOT,CONFIG_FILE="",filter=""):
         with open(SOURCES_ROOT+'/subdir.json','r') as fp:
             content = fp.read()
             if content != "":
+                content = content.replace('\\"','"').lstrip('"').rstrip().rstrip('"') #兼容git bash和power shell，解决两者生成的json文件不一致的问题
                 ret = json.loads(content)  #json.loads读的是字符串，必须把文件先读出来
 
         fp.close()

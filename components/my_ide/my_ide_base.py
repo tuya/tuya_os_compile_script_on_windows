@@ -205,6 +205,8 @@ class my_ide_base(object):
                         continue
                     elif k == 'components':
                         group_name = 'comp'
+                    elif k == 'application_components':
+                        group_name = 'app_comp'
                     else:
                         group_name = k
                 else:
