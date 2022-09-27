@@ -192,9 +192,9 @@ class my_ide_keil4(my_ide_base):
         while 1<2:
             time.sleep(0.5)
             if os.path.exists(log_file_path) and os.path.isfile(log_file_path):
-                line_num = sum(1 for line in open(log_file_path))
+                line_num = sum(1 for line in open(log_file_path, errors='ignore'))
                 if line_num > self.counter:
-                    with open(log_file_path, "r") as fp:
+                    with open(log_file_path, "r", errors='ignore') as fp:
                         lines = fp.readlines()
                         for line in lines[self.counter:]:
                             print(line,end='')

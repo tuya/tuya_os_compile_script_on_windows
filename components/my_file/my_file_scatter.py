@@ -17,7 +17,7 @@ class my_file_scatter:
 
     # 检查 XIP 报错
     def __check_xip_flash_error(self):
-        with open(self.LOG_FILE) as temp_log:
+        with open(self.LOG_FILE, errors='ignore') as temp_log:
             datafile = temp_log.readlines()
         for line in datafile:
             if 'ER_ROM_XIP' in line:
