@@ -15,6 +15,13 @@ def __version_string_to_hex(version,kind=None):
             version_int |= ord(nums[idx]) << (idx*8)
             idx += 1
         version_hex = "{:#1x}".format(version_int)
+    elif kind == 'zigbee':
+        if len(nums) == 3:
+            version_int = (int(nums[2]) << 6) | (int(nums[1]) << 4) | int(nums[0])
+            version_hex = "{:#1x}".format(version_int)
+        else:
+            print("version input format error! x.x.x (max:3.3.15)")
+            exit(1)
     else:
         idx = 0
         while idx < len(nums):
@@ -65,6 +72,10 @@ def conf2h(conf, header, fw_name, fw_version, board_name):
         header_f.write('#define BUILD_FIRMNAME          "'+fw_name+'"\n')
         header_f.write('#define FW_VERSION              "'+fw_version+'"\n')
         header_f.write('#define FW_VERSION_HEX          '+__version_string_to_hex(fw_version,'mesh')+'\n')
+    elif 'zigbee' in board_name:
+        header_f.write('#define BUILD_FIRMNAME          "'+fw_name+'"\n')
+        header_f.write('#define FW_VERSION              "'+fw_version+'"\n')
+        header_f.write('#define FW_VERSION_HEX          '+__version_string_to_hex(fw_version,'zigbee')+'\n')
     else:
         header_f.write('#define FIRMWARE_NAME           "'+fw_name+'"\n')
         header_f.write('#define FIRMWARE_VERSION        "'+fw_version+'"\n')
