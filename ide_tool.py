@@ -19,7 +19,7 @@ from my_ide.my_ide_keil import *
 from my_ide.my_ide_cdk import *
 from my_ide.my_ide_codeblocks import *
 from my_ide.my_ide_keil4 import *
-from my_ide.my_ide_iar840 import *
+from my_ide.my_ide_iar import *
 from my_ide.my_ide_iar930 import *
 from my_ide.my_ide_front import my_ide_front
 
@@ -40,8 +40,8 @@ def ide_tool_back(OP,JSON_FILE,KIND='gcc'):
         ide = my_ide_codeblocks(JSON_FILE)
     elif KIND == 'keil4':
         ide = my_ide_keil4(JSON_FILE)
-    elif KIND == 'iar840':
-        ide = my_ide_iar840(JSON_FILE)
+    elif KIND == 'iar':
+        ide = my_ide_iar(JSON_FILE)
     elif KIND == 'iar930':
         ide = my_ide_iar930(JSON_FILE)
     ide.tmake()

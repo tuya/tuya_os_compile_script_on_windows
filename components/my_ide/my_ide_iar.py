@@ -19,7 +19,7 @@ from my_file.my_file import *
 from my_file.my_file_scatter import my_file_scatter
 from my_exe.my_exe import my_exe_simple, my_exe_get_install_path
 
-class my_ide_iar840(my_ide_base):
+class my_ide_iar(my_ide_base):
     ide_kind = 'iar'
     ewp_path = ''
     uv4_path = ''
@@ -29,7 +29,7 @@ class my_ide_iar840(my_ide_base):
     def tmake(self):
         my_ide_base.tmake(self,'..')
         
-        IAR_PATH = my_exe_get_install_path('$IAR840_PATH')   
+        IAR_PATH = my_exe_get_install_path('$IAR_PATH')   
         self.uv4_path = IAR_PATH#+'/IarBuild.exe'
 
     def tbuild(self):
