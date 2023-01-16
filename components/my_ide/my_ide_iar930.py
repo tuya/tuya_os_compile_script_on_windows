@@ -19,7 +19,7 @@ from my_file.my_file import *
 from my_file.my_file_scatter import my_file_scatter
 from my_exe.my_exe import my_exe_simple, my_exe_get_install_path
 
-class my_ide_iar(my_ide_base):
+class my_ide_iar930(my_ide_base):
     ide_kind = 'iar'
     ewp_path = ''
     uv4_path = ''
@@ -29,14 +29,16 @@ class my_ide_iar(my_ide_base):
     def tmake(self):
         my_ide_base.tmake(self,'..')
         
-        IAR_PATH = my_exe_get_install_path('$IAR_PATH')   
-        self.uv4_path = IAR_PATH+'/IarBuild.exe'
+        IAR_PATH = my_exe_get_install_path('$IAR930_PATH')   
+        self.uv4_path = IAR_PATH#+'/IarBuild.exe'
 
     def tbuild(self):
         print('\nBUILD')
         cmd = 'IarBuild.exe ./.log/Demo.ewp -build * -log all'
+        print('> [path]:'+self.uv4_path)
         print('> [cmd]:'+cmd)
         print('> wait about 2 min ...')
+        sys.stdout.flush()
         my_exe_simple(cmd,1,self.uv4_path,None)
 
         DEMO_NAME = self.output['fw']['name']
