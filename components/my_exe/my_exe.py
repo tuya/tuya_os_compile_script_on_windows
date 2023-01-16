@@ -76,7 +76,13 @@ def my_exe_get_install_path(NAME):
         },
         '$IAR_PATH':{
            'PATH':'D:/Program Files (x86)/IAR Systems/Embedded Workbench 8.3/common/bin',
-           'KEY':'IAR',
+           'KEY':'ARM 8.40',
+           'FATHER':0,
+           'TITLE':'请选择 IAR 的可执行文件 "IarBuild.exe"'
+        },
+        '$IAR930_PATH':{
+           'PATH':'D:/Program Files (x86)/IAR Systems/Embedded Workbench 8.3/common/bin',
+           'KEY':'ARM 9.30',
            'FATHER':0,
            'TITLE':'请选择 IAR 的可执行文件 "IarBuild.exe"'
         },
