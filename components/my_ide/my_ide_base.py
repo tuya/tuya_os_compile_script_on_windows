@@ -110,7 +110,17 @@ class my_ide_base(object):
       
     # 形成 SDK
     def tsdk(self):
-        print('\nMAKE')
+        print('\nCreate SDK...')
+        if self.output['kind'] == 'apps':
+            self.tAppPackage()
+        elif self.output['kind'] == 'samples':
+            self.tBasePackage()
+        else:
+            print('error')
+
+    # 形成基线开发包
+    def tBasePackage(self):
+        print('\nMAKE Base Package...')
         my_file_clear_folder(self.output['path']) 
         
         print('#1. Create Output Package...')
@@ -166,6 +176,65 @@ class my_ide_base(object):
             print('    [cp] cp %s to %s'%(src_path,dst_path))
             
         print('#3. use _tlib to greate the libs ...')   
+        self._tlib(libs_path,incs_path,comp_path,self.__log_path)
+
+    # 形成应用开发包
+    def tAppPackage(self):
+        print('\nMAKE APP Package...')
+        DEMO_NAME = self.output['fw']['name']
+
+        my_file_clear_folder(self.output['path']) 
+        
+        print('#1. Create Output Package...')
+        
+        output_path     = self.output['path']
+        app_path        = output_path + '/' + DEMO_NAME
+        doc_path        = app_path + '/doc'
+        src_path        = app_path + '/src'
+        inc_path        = app_path + '/include'
+        comp_path       = app_path + '/app.components'
+        libs_path       = app_path + '/app.libs/src'
+        incs_path       = app_path + '/app.libs/include'
+        build_path      = app_path + '/build'
+
+        app_root    = self.output['project_path'] + '/apps/' + DEMO_NAME 
+        doc_root    = app_root+ '/doc'
+        src_root    = app_root + '/src'
+        inc_root    = app_root + '/include'
+    
+        my_file_copy_dir_to(doc_root,doc_path)
+        my_file_copy_dir_to(src_root,src_path)
+        my_file_copy_dir_to(inc_root,inc_path)
+        my_file_clear_folder(comp_path)
+        my_file_clear_folder(libs_path)
+        my_file_clear_folder(incs_path)
+        my_file_clear_folder(build_path)
+
+        shutil.copy(app_root+'/tuya_iot.config',build_path+'/tuya_app.config')
+        my_file_copy_files_to([app_root+'/IoTOSconfig',
+                               app_root+'/local.mk',
+                               app_root+'/README.md'],app_path)
+       
+        # 剔除基线的组件，否则会将基线的组件打包到应用包中
+        libs = self.output['sdk']['libs']        
+        base_comp = []
+        for k,v in self.output['sdk']['components'].items():
+            if k.startswith('tal_'):
+                base_comp.append(k)
+            elif k not in libs:# 应用组件，支持将 kconfig 携带
+                src_comp_path = self.output['project_path']+'/components/'+k
+                dst_comp_path = comp_path+'/'+k
+                my_file_copy_dir_to(src_comp_path,dst_comp_path)
+                my_file_rm_dir(dst_comp_path+'/.git') 
+                
+                # 也剔除掉，因为 _tlib 自带对不打库的组件进行源码复制，我们这里自己处理了，就要将其剔除
+                base_comp.append(k) 
+
+        for k in base_comp:
+            self.output['sdk']['components'].pop(k)
+
+        print(self.output['sdk']['components'])  
+        print('#2. use _tlib to greate the libs ...')   
         self._tlib(libs_path,incs_path,comp_path,self.__log_path)
     
     # 形成 SDK 中用库的函数
