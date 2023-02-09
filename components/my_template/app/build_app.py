@@ -64,6 +64,10 @@ if BUILD_COMMAND == "build":
     cmd = "%s build"%(SCRIPT_PREPARE)
     exe("build...", cmd)
 
+if BUILD_COMMAND == "sdk":
+    cmd = "%s sdk"%(SCRIPT_PREPARE)
+    exe("build...", cmd)
+
 if BUILD_COMMAND == "flash_user":
     cmd = "%s flash_user"%(SCRIPT_PREPARE)
     exe("flash user...", cmd) 

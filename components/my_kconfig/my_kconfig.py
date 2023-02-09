@@ -12,7 +12,7 @@ from my_kconfig.menuconfig import menuconfig
 from my_kconfig.conf2h import conf2h
 
 
-def my_kconfig(project_path,app_path,fw_name,fw_version,board_name,auto=0):
+def my_kconfig(project_path,app_path,fw_name,fw_version,board_name,auto=0,gui=1):
     project_path = project_path.replace('\\','/')
     app_path = app_path.replace('\\','/')
 
@@ -29,11 +29,18 @@ def my_kconfig(project_path,app_path,fw_name,fw_version,board_name,auto=0):
     PROJECT_PATH=my_file_path_formart(project_path)
     APP_PATH=PROJECT_PATH+"/"+my_file_path_formart(app_path)
     COMP_PATH=PROJECT_PATH+"/components"
-    APP_COMP_PATH=PROJECT_PATH+"/application_components"
+    APP_COMP_PATH=APP_PATH+"/app.components"
     BUILD_PATH=PROJECT_PATH+"/build"
-    CONFIG_FILE=BUILD_PATH+"/tuya_iot.config"
-    CONFIG_FILE_BK=APP_PATH+"/tuya_iot.config"
-    KCONFIG_FILE=BUILD_PATH+"/IoTOSconfig"
+
+    if os.path.exists(APP_PATH+'/build'):#apps project the KCONFIG and CONFIG_FILE_BK have different name
+        CONFIG_FILE=BUILD_PATH+"/tuya_app.config"
+        CONFIG_FILE_BK=APP_PATH+"/build/tuya_app.config"
+        KCONFIG_FILE = BUILD_PATH+"/APPconfig"
+    else:
+        CONFIG_FILE=BUILD_PATH+"/tuya_iot.config"
+        CONFIG_FILE_BK=APP_PATH+"/tuya_iot.config"
+        KCONFIG_FILE=BUILD_PATH+"/IoTOSconfig"
+
     HEAD_FILE=APP_PATH+"/app_config.h"
 
     # -----------------------------------------------------------------------------------------------   
@@ -80,21 +87,22 @@ def my_kconfig(project_path,app_path,fw_name,fw_version,board_name,auto=0):
             fp.write(kconfig_str)
 
         # -----------------------------------------------------------------------------------------------
-        print('    > SHOW MenuConfig:')
-        # Get the path to the current python interpreter
-        PYTHON_PATH = '"'+sys.executable+'"'
-       
+        if gui == 1:
+            print('    > SHOW MenuConfig:')
+            # Get the path to the current python interpreter
+            PYTHON_PATH = '"'+sys.executable+'"'
+           
 
-        cmd = PYTHON_PATH + ' ' + my_kconfig_dir + '/menuconfig.py ' + KCONFIG_FILE
-        env = {'KCONFIG_CONFIG':CONFIG_FILE}
-        print(cmd)
-        my_exe_simple(cmd,1,env)
+            cmd = PYTHON_PATH + ' ' + my_kconfig_dir + '/menuconfig.py ' + KCONFIG_FILE
+            env = {'KCONFIG_CONFIG':CONFIG_FILE}
+            print(cmd)
+            my_exe_simple(cmd,1,env)
 
-        # -----------------------------------------------------------------------------------------------
-        print('    > Create HEAD_FILE = %s'%(HEAD_FILE))
-        print('    > Copy %s To %s\n'%(CONFIG_FILE,CONFIG_FILE_BK))
-        conf2h(CONFIG_FILE,HEAD_FILE,fw_name,fw_version,board_name)    
-        shutil.copy(CONFIG_FILE,CONFIG_FILE_BK)
+            # -----------------------------------------------------------------------------------------------
+            print('    > Create HEAD_FILE = %s'%(HEAD_FILE))
+            print('    > Copy %s To %s\n'%(CONFIG_FILE,CONFIG_FILE_BK))
+            conf2h(CONFIG_FILE,HEAD_FILE,fw_name,fw_version,board_name)    
+            shutil.copy(CONFIG_FILE,CONFIG_FILE_BK)
     
     else:
         if os.path.exists(CONFIG_FILE_BK):
@@ -111,6 +119,6 @@ def my_kconfig(project_path,app_path,fw_name,fw_version,board_name,auto=0):
         else:
             print('    > Check %s not exists'%(CONFIG_FILE_BK))
             print('    > Call my_kconfig to create ->')
-            my_kconfig(project_path,app_path,fw_name,fw_version,board_name,0)
+            my_kconfig(project_path,app_path,fw_name,fw_version,board_name,0,gui)
 
 

@@ -25,8 +25,9 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
     PROJECT_PATH=my_file_path_formart(project_path)
     APP_PATH=PROJECT_PATH+"/"+my_file_path_formart(app_path)
     COMP_PATH=PROJECT_PATH+"/components"
-    APP_COMP_PATH=PROJECT_PATH+"/application_components"
+    APP_COMP_PATH=APP_PATH+"/app.components"
     LIBS_PATH=PROJECT_PATH+"/libs"
+    APP_LIBS_PATH=APP_PATH+"/app.libs"
     INCLUDE_PATH=PROJECT_PATH+"/include"
     VENDOR_PATH=PROJECT_PATH+'/vendor/'+vendor_name
     VENDOR_JSON=VENDOR_PATH+'/toolchain/templates/vendor.json'
@@ -45,6 +46,7 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
         'output':{
             'project_path':'$ABS_PROJECT_ROOT',
             'path':OUTPUT_PATH,
+            'kind':os.path.basename(os.path.dirname(app_path)),
             'vendor':vendor_name,
             'fw':{
                 'name':FIRMWARE_NAME,
@@ -55,6 +57,7 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
         'components':{},
         'application_components':{},
         'libs':{},
+        'app_libs':{},
         'include':{},
         'adapter':{},
         'tkl':{
@@ -97,6 +100,9 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
 
     print('    -> libs')
     json_root['libs'] = my_file_create_subgroup(LIBS_PATH)
+
+    print('    -> app libs')
+    json_root['app_libs'] = my_file_create_subgroup(APP_LIBS_PATH)
 
     print('    -> include')
     json_root['include'] = my_file_create_subgroup(INCLUDE_PATH)
