@@ -1,6 +1,7 @@
 # coding:utf-8
 import os
 import sys
+import shutil
 import subprocess
 
 from pathlib import Path
@@ -46,6 +47,16 @@ PYTHON_PATH     = '"'+sys.executable+'"'
 SCRIPT_IDE_TOOL = PYTHON_PATH + ' ./.ide_tool/ide_tool.py'
 SCRIPT_PREPARE  = PYTHON_PATH + ' ./vendor/'+BOARD_NAME+'/prepare.py'
 
+# 删除一个文件夹
+def rm_dir(path):
+    def readonly_handler(func, path, execinfo):
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+
+    if os.path.exists(path):
+        shutil.rmtree(path, onerror=readonly_handler)
+
+
 def exe(note,cmd):
     print(note)
     ret = subprocess.call(cmd,shell=True)
@@ -78,4 +89,4 @@ if BUILD_COMMAND == "flash_all":
     
 if BUILD_COMMAND == "clean":
     print("clean...")
-
+    rm_dir('.log')
