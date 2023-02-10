@@ -31,13 +31,13 @@ def my_kconfig(project_path,app_path,fw_name,fw_version,board_name,auto=0,gui=1)
     COMP_PATH=PROJECT_PATH+"/components"
     APP_COMP_PATH=APP_PATH+"/app.components"
     BUILD_PATH=PROJECT_PATH+"/build"
+    CONFIG_FILE=BUILD_PATH+"/tuya_iot.config"
+
 
     if os.path.exists(APP_PATH+'/build'):#apps project the KCONFIG and CONFIG_FILE_BK have different name
-        CONFIG_FILE=BUILD_PATH+"/tuya_app.config"
         CONFIG_FILE_BK=APP_PATH+"/build/tuya_app.config"
         KCONFIG_FILE = BUILD_PATH+"/APPconfig"
     else:
-        CONFIG_FILE=BUILD_PATH+"/tuya_iot.config"
         CONFIG_FILE_BK=APP_PATH+"/tuya_iot.config"
         KCONFIG_FILE=BUILD_PATH+"/IoTOSconfig"
 

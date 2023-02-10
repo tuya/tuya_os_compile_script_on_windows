@@ -219,7 +219,7 @@ class my_ide_base(object):
         libs = self.output['sdk']['libs']        
         base_comp = []
         for k,v in self.output['sdk']['components'].items():
-            if k.startswith('tal_'):
+            if k.startswith('tal_') or k == 'app_tuya_driver':#app_tuya_driver 是基线的一个命名非常奇怪的组件
                 base_comp.append(k)
             elif k not in libs:# 应用组件，支持将 kconfig 携带
                 src_comp_path = self.output['project_path']+'/components/'+k

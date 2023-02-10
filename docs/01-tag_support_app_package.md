@@ -74,11 +74,11 @@ python vendor/tlsr825x_smesh/prepare.py 'sdk'
 
 **B -> ** 在 my_kconfig 中，为了兼容 tuya wind 自带的 KCONFIG GUI，因此 `my_kconfig` 多加一个 `gui` 是否使能的参数。当其为 1 时，启动 terminal gui，当其为 0 时，仅仅是生成 KCONFIG 文件，然后让 wind ide 的 GUI 读取 KCONFIG 文件，加载页面。
 
-此外，由于基线开发、品类开发的 KCONFIG 文件、config 文件、config_bk 文件和应用开发时不一样，因此通过 `if os.path.exists(APP_PATH+'/build')` 做计算区分：
+此外，由于基线开发、品类开发的 KCONFIG 文件、config_bk 文件和应用开发时不一样，因此通过 `if os.path.exists(APP_PATH+'/build')` 做计算区分：
 
 文件 | 应用开发 | 基线、品类开发
 ---|---|---
-CONFIG_FILE | `BUILD_PATH+"/tuya_app.config"` | `BUILD_PATH+"/tuya_iot.config"`
+CONFIG_FILE | `BUILD_PATH+"/tuya_iot.config"` | `BUILD_PATH+"/tuya_iot.config"`
 CONFIG_FILE_BK | `APP_PATH+"/build/tuya_app.config"` | `APP_PATH+"/tuya_iot.config"`
 KCONFIG_FILE | `BUILD_PATH+"/APPconfig"` | `BUILD_PATH+"/IoTOSconfig"`
 
