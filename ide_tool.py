@@ -69,8 +69,8 @@ if __name__ == '__main__':
         ide_tool_help()
     else:
         OP = sys.argv[1]
-        if (OP == 'menuconfig') and (PARAMS_NUM == 6):
-            my_kconfig(sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6]) 
+        if (OP == 'menuconfig') and (PARAMS_NUM == 8):
+            my_kconfig(sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6],int(sys.argv[7]),int(sys.argv[8])) 
         elif (OP == 'front') and (PARAMS_NUM == 7):
             ide_tool_front(sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6],sys.argv[7])
         elif (OP == 'build' or OP == 'sdk' or OP == 'flash_user' or OP == 'flash_all') and (PARAMS_NUM == 2):

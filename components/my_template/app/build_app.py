@@ -24,12 +24,14 @@ DEMO_FIRMWARE_VERSION = sys.argv[3]
 DEMO_OUTPUT_PATH = "_output"
 
 BUILD_COMMAND = 'build'
+PARAMS1 = 'NONE'
 
 if len(sys.argv) == 5:
     BUILD_COMMAND = sys.argv[4]
 if len(sys.argv) == 6:
     BUILD_COMMAND = sys.argv[4]
     DEMO_OUTPUT_PATH = sys.argv[5] 
+    PARAMS1 = sys.argv[5]
 
 
 def get_board_name(path):
@@ -65,7 +67,12 @@ def exe(note,cmd):
         sys.exit(1)
 
 if BUILD_COMMAND == "config":
-    cmd = "%s menuconfig \"%s\" \"%s\" \"%s\" \"%s\" \"%s\""%(SCRIPT_IDE_TOOL, './', DEMO_PATH, DEMO_NAME, DEMO_FIRMWARE_VERSION, BOARD_NAME)
+    CONFIG_AUTO = 0
+    if PARAMS1 == 'gui':
+        ENABLE_GUI = 0
+    else:
+        ENABLE_GUI = 1
+    cmd = "%s menuconfig \"%s\" \"%s\" \"%s\" \"%s\" \"%s\" %d %d"%(SCRIPT_IDE_TOOL, './', DEMO_PATH, DEMO_NAME, DEMO_FIRMWARE_VERSION, BOARD_NAME, CONFIG_AUTO, ENABLE_GUI)
     exe("config...", cmd)
 
 if BUILD_COMMAND == "build":
