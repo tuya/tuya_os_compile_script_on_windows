@@ -222,7 +222,13 @@ class my_ide_base(object):
             if k.startswith('tal_') or k == 'app_tuya_driver':#app_tuya_driver 是基线的一个命名非常奇怪的组件
                 base_comp.append(k)
             elif k not in libs:# 应用组件，支持将 kconfig 携带
-                src_comp_path = self.output['project_path']+'/components/'+k
+                src1_comp_path = self.output['project_path']+'/components/'+k
+                src2_comp_path = self.output['project_path']+'/application_components/'+k
+                if os.path.exists(src1_comp_path):
+                    src_comp_path = src1_comp_path
+                elif os.path.exists(src2_comp_path):
+                    src_comp_path = src2_comp_path
+
                 dst_comp_path = comp_path+'/'+k
                 my_file_copy_dir_to(src_comp_path,dst_comp_path)
                 my_file_rm_dir(dst_comp_path+'/.git') 
