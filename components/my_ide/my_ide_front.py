@@ -26,6 +26,7 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
     APP_PATH=PROJECT_PATH+"/"+my_file_path_formart(app_path)
     COMP_PATH=PROJECT_PATH+"/components"
     APP_COMP_PATH=APP_PATH+"/app.components"
+    APPx_COMP_PATH=PROJECT_PATH+"/application_components"
     LIBS_PATH=PROJECT_PATH+"/libs"
     APP_LIBS_PATH=APP_PATH+"/app.libs"
     INCLUDE_PATH=PROJECT_PATH+"/include"
@@ -96,6 +97,16 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
     for component in application_components_list:
         print('        -> '+component)
         json_root['application_components'][component] = my_file_create_subgroup(APP_COMP_PATH+"/"+component,CONFIG_FILE)
+
+    print('    -> application_components')
+    application_components_list=[]
+    for root, dirs, files in os.walk(APPx_COMP_PATH):
+        application_components_list = dirs
+        break
+
+    for component in application_components_list:
+        print('        -> '+component)
+        json_root['components'][component] = my_file_create_subgroup(APPx_COMP_PATH+"/"+component,CONFIG_FILE)
 
 
     print('    -> libs')

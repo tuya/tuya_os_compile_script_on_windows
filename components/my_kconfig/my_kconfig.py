@@ -30,6 +30,7 @@ def my_kconfig(project_path,app_path,fw_name,fw_version,board_name,auto=0,gui=1)
     APP_PATH=PROJECT_PATH+"/"+my_file_path_formart(app_path)
     COMP_PATH=PROJECT_PATH+"/components"
     APP_COMP_PATH=APP_PATH+"/app.components"
+    APPx_COMP_PATH=PROJECT_PATH+"/application_components"
     BUILD_PATH=PROJECT_PATH+"/build"
     CONFIG_FILE=BUILD_PATH+"/tuya_iot.config"
 
@@ -74,6 +75,16 @@ def my_kconfig(project_path,app_path,fw_name,fw_version,board_name,auto=0,gui=1)
             kcfg = APP_COMP_PATH+'/'+component+'/IoTOSconfig'
             if os.path.exists(kcfg):
                 kconfig_str+=('\trsource\t.'+kcfg+'\n')
+
+        for root, dirs, files in os.walk(APPx_COMP_PATH):
+            components_list = dirs
+            break
+
+        for component in components_list:
+            kcfg = APPx_COMP_PATH+'/'+component+'/IoTOSconfig'
+            if os.path.exists(kcfg):
+                kconfig_str+=('\trsource\t.'+kcfg+'\n')
+
         kconfig_str+='endmenu\n\n'
         
         # print(kconfig_str)
