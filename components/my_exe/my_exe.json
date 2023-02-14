@@ -1,0 +1,58 @@
+{
+    "$KEIL_PATH": {
+        "PATH": "C:/Keil_v5",
+        "EXE": "UV4.exe",
+        "KEY": [
+            "UV4"
+        ],
+        "FATHER": 1,
+        "TITLE": "请选择 Keil 的可执行文件 \"UV4.exe\""
+    },
+    "$CDK_PATH": {
+        "PATH": "D:/C-Sky/CDK",
+        "EXE": "cdk.exe",
+        "KEY": [
+            "CDK"
+        ],
+        "FATHER": 0,
+        "TITLE": "请选择 cdk 的可执行文件 \"cdk.exe\""
+    },
+    "$KEIL4_PATH": {
+        "PATH": "D:/keil 4",
+        "EXE": "UV4.exe",
+        "KEY": [
+            "UV4"
+        ],
+        "FATHER": 1,
+        "TITLE": "请选择 Keil4 的可执行文件 \"UV4.exe\""
+    },
+    "$IAR_PATH": {
+        "PATH": "D:/Program Files (x86)/IAR Systems/Embedded Workbench 8.3/common/bin",
+        "EXE": "IarBuild.exe",
+        "KEY": [
+            "ARM 8.40",
+            "IAR804"
+        ],
+        "FATHER": 0,
+        "TITLE": "请选择 IAR 的可执行文件 \"IarBuild.exe\""
+    },
+    "$IAR930_PATH": {
+        "PATH": "D:/Program Files (x86)/IAR Systems/Embedded Workbench 8.3/common/bin",
+        "EXE": "IarBuild.exe",
+        "KEY": [
+            "ARM 9.30",
+            "IAR930"
+        ],
+        "FATHER": 0,
+        "TITLE": "请选择 IAR 的可执行文件 \"IarBuild.exe\""
+    },
+    "$CODEBLOCKS_PATH": {
+        "PATH": "C:/Program Files (x86)/CodeBlocks",
+        "EXE": "codeblocks.exe",
+        "KEY": [
+            "CodeBlocks"
+        ],
+        "FATHER": 0,
+        "TITLE": "请选择 CodeBlocks 的可执行文件 \"codeblocks.exe\""
+    }
+}
