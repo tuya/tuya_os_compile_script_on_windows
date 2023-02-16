@@ -197,6 +197,7 @@ def my_file_get_abs_path_and_formart(relative_path):
         return relative_path
 
 def my_file_path_formart(path_str):
+    path_str = path_str.replace('\\','/')
     if path_str.endswith('/'):
         path_str = path_str[:-1]
     if path_str.startswith('./'):
