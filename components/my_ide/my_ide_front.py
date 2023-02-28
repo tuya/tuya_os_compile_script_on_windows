@@ -35,6 +35,7 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
     CONFIG_FILE=PROJECT_PATH+"/build/tuya_iot.config"
     ADAPTER_PATH=PROJECT_PATH+"/adapter"
     SDK_CONFIG_JSON=APP_PATH+"/sdkconfig.json"
+    DEPEND_JSON=APP_PATH+"/depend.json"
 
 
     OUTPUT_PATH=my_file_path_formart(output_path)
@@ -76,18 +77,7 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
     print('    -> apps/'+my_file_path_formart(app_path))
     json_root['app'] = my_file_create_subgroup(APP_PATH)
 
-
-    print('    -> components')
-    components_list=[]
-    for root, dirs, files in os.walk(COMP_PATH):
-        components_list = dirs
-        break
-
-    for component in components_list:
-        print('        -> '+component)
-        json_root['components'][component] = my_file_create_subgroup(COMP_PATH+"/"+component,CONFIG_FILE)
-
-
+    # 应用目录中的 component（一般时应用组件）
     print('    -> application_components')
     application_components_list=[]
     for root, dirs, files in os.walk(APP_COMP_PATH):
@@ -98,6 +88,7 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
         print('        -> '+component)
         json_root['application_components'][component] = my_file_create_subgroup(APP_COMP_PATH+"/"+component,CONFIG_FILE)
 
+    # 根目录中的应用 component（一般时品类组件）
     print('    -> application_components')
     application_components_list=[]
     for root, dirs, files in os.walk(APPx_COMP_PATH):
@@ -108,16 +99,61 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
         print('        -> '+component)
         json_root['components'][component] = my_file_create_subgroup(APPx_COMP_PATH+"/"+component,CONFIG_FILE)
 
-
-    print('    -> libs')
-    json_root['libs'] = my_file_create_subgroup(LIBS_PATH)
-
     print('    -> app libs')
     json_root['app_libs'] = my_file_create_subgroup(APP_LIBS_PATH)
 
-    print('    -> include')
-    json_root['include'] = my_file_create_subgroup(INCLUDE_PATH)
 
+    # 按需加载基线的开源与闭源组件<docs/03-xxx>
+    depend = my_file_read_json(DEPEND_JSON)
+    if depend == {}:
+        # 根目录中的 components（一般是基线的开源组件，品类在 cde 上配置在老的组件列，也会放在这里，这种方式已经渐渐弃用了）
+        print('    -> components')
+        components_list=[]
+        for root, dirs, files in os.walk(COMP_PATH):
+            components_list = dirs
+            break
+
+        for component in components_list:
+            print('        -> '+component)
+            json_root['components'][component] = my_file_create_subgroup(COMP_PATH+"/"+component,CONFIG_FILE)
+
+        # 基线的闭源库    
+        print('    -> libs')
+        json_root['libs'] = my_file_create_subgroup(LIBS_PATH)
+
+        # 基线的头文件
+        print('    -> include')
+        json_root['include'] = my_file_create_subgroup(INCLUDE_PATH)
+    else:
+        # 按照 depend.json 指定的基线中的开源组件进行加载
+        print('    -> components')
+        components_list=depend['base']['components']
+        for component in components_list:
+            print('        -> '+component)
+            json_root['components'][component] = my_file_create_subgroup(COMP_PATH+"/"+component,CONFIG_FILE)
+
+        # 按照 depend.json 指定的基线中的闭源组建进行加载
+        print('    -> libs')
+        h_list=[]
+        c_list=[]
+        l_list=[]
+        libs_list=depend['base']['libs']
+        for lib in libs_list:
+            print('        -> '+lib)
+            lib_name = lib.split(".")[0]
+            if lib_name.startswith('lib'):
+                lib_name = lib_name[3:]
+            
+            lib_path = "$PROJECT_ROOT/libs/"+lib
+            lib_head_file_path = "$PROJECT_ROOT/include/components/"+lib_name+"/include"
+            l_list.append(lib_path)
+            h_list.append(lib_head_file_path)
+            
+        json_root['libs'] = {'c_files':list(set(c_list)),'h_dir':list(set(h_list)),'l_files':list(set(l_list))}
+        json_root['include']['vendor'] = my_file_create_subgroup(INCLUDE_PATH+'/vendor')
+        json_root['include']['base'] = my_file_create_subgroup(INCLUDE_PATH+'/base')
+
+# vendor 中的各种文件
     print('    -> adapter')
     json_root['adapter'] = my_file_create_subgroup(ADAPTER_PATH,filter=".h")
 
