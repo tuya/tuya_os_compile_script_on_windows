@@ -82,6 +82,12 @@ class my_ide_base(object):
                     
             print('#5. get var map')
             self.__get_variable_map()
+
+        print('> AFTER MAKE CALL VENDOR PYTHON SCRIPTS...')
+        after_make_python = './.log/after_make.py' 
+        if os.path.exists(after_make_python):
+            after_make_cmd = 'python ' + after_make_python
+            my_exe_simple(after_make_cmd,1,None,self.var_map)
             
     # 编译
     def tbuild(self):
