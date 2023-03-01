@@ -127,15 +127,20 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
     else:
         # 按照 depend.json 指定的基线中的开源组件进行加载
         print('    -> components')
+        h_list=[]
         components_list=depend['base']['components']
         for component in components_list:
             print('        -> '+component)
             json_root['components'][component] = my_file_create_subgroup(COMP_PATH+"/"+component,CONFIG_FILE)
 
+            # Zibgee 工程生成的开源库，其 .c 和蓝牙一样放置; 其 .h 放置方式和 lib 方式一样（放在 include/components/xxx/include 中）
+            # 为了兼容，做下面处理
+            lib_head_file_path = "include/components/"+component+"/include"
+            if os.path.exists(lib_head_file_path):
+                l_list.append('$PROJECT_ROOT/'+lib_path)
+
         # 按照 depend.json 指定的基线中的闭源组建进行加载
         print('    -> libs')
-        h_list=[]
-        c_list=[]
         l_list=[]
         libs_list=depend['base']['libs']
         for lib in libs_list:
@@ -145,11 +150,14 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
                 lib_name = lib_name[3:]
             
             lib_path = "$PROJECT_ROOT/libs/"+lib
-            lib_head_file_path = "$PROJECT_ROOT/include/components/"+lib_name+"/include"
-            l_list.append(lib_path)
-            h_list.append(lib_head_file_path)
+            l_list.append(lib_path)   
+
+            lib_head_file_path = "include/components/"+lib_name+"/include"
+            if os.path.exists(lib_head_file_path):
+                h_list.append('$PROJECT_ROOT/'+lib_head_file_path)
+
             
-        json_root['libs'] = {'c_files':list(set(c_list)),'h_dir':list(set(h_list)),'l_files':list(set(l_list))}
+        json_root['libs'] = {'h_dir':list(set(h_list)),'l_files':list(set(l_list))}
         json_root['include']['vendor'] = my_file_create_subgroup(INCLUDE_PATH+'/vendor')
         json_root['include']['base'] = my_file_create_subgroup(INCLUDE_PATH+'/base')
 

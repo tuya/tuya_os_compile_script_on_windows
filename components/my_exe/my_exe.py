@@ -95,7 +95,7 @@ def my_exe_get_install_path(NAME):
                             ret = __my_exe_check_version(PATH + '/TOOLS.INI',['VERSION=4.'])
                             if ret['VERSION=4.'] == 0:
                                 OK = False
-                        elif NAME == '$KEIL4_PATH':
+                        elif NAME == '$KEIL_PATH':
                             ret = __my_exe_check_version(PATH + '/TOOLS.INI',['VERSION=5.'])
                             if ret['VERSION=5.'] == 0:
                                 OK = False

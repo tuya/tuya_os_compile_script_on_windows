@@ -52,59 +52,67 @@
 - 根据 `depend['base']['components']` 加载基线开源组件
 - 根据 `depend['base']['libs']` 加载基线闭源库
 
-注意：由于之前可以直接加载整个 `include` 下的头文件（包括 base,vendor,compenents）,其中 compenents 下是所有基线闭源库对应的头文件，有可能会有相同冲突的头文件，因此，当有 `depend.json` 时，会分别加载 `include/vendor`、`include/base` 以及根据依赖的 `lib` 计算出库对应头文件放在路径，然后加载。
+注意：由于之前可以直接加载整个 `include` 下的头文件（包括 base,vendor,compenents）,其中 compenents 下是所有基线闭源库（特殊情况存在开源组件）对应的头文件，有可能会有相同冲突的头文件，因此，当有 `depend.json` 时，会分别加载 `include/vendor`、`include/base` 以及根据依赖的 `lib` / 开源组件计算出库对应头文件放在路径，然后加载。
 
 
 ```c
-    # 按需加载基线的开源与闭源组件<docs/03-xxx>
-    depend = my_file_read_json(DEPEND_JSON)
-    if depend == {}:
-        # 根目录中的 components（一般是基线的开源组件，品类在 cde 上配置在老的组件列，也会放在这里，这种方式已经渐渐弃用了）
-        print('    -> components')
-        components_list=[]
-        for root, dirs, files in os.walk(COMP_PATH):
-            components_list = dirs
-            break
+# 按需加载基线的开源与闭源组件<docs/03-xxx>
+depend = my_file_read_json(DEPEND_JSON)
+if depend == {}:
+    # 根目录中的 components（一般是基线的开源组件，品类在 cde 上配置在老的组件列，也会放在这里，这种方式已经渐渐弃用了）
+    print('    -> components')
+    components_list=[]
+    for root, dirs, files in os.walk(COMP_PATH):
+        components_list = dirs
+        break
 
-        for component in components_list:
-            print('        -> '+component)
-            json_root['components'][component] = my_file_create_subgroup(COMP_PATH+"/"+component,CONFIG_FILE)
+    for component in components_list:
+        print('        -> '+component)
+        json_root['components'][component] = my_file_create_subgroup(COMP_PATH+"/"+component,CONFIG_FILE)
 
-        # 基线的闭源库    
-        print('    -> libs')
-        json_root['libs'] = my_file_create_subgroup(LIBS_PATH)
+    # 基线的闭源库    
+    print('    -> libs')
+    json_root['libs'] = my_file_create_subgroup(LIBS_PATH)
 
-        # 基线的头文件
-        print('    -> include')
-        json_root['include'] = my_file_create_subgroup(INCLUDE_PATH)
-    else:
-        # 按照 depend.json 指定的基线中的开源组件进行加载
-        print('    -> components')
-        components_list=depend['base']['components']
-        for component in components_list:
-            print('        -> '+component)
-            json_root['components'][component] = my_file_create_subgroup(COMP_PATH+"/"+component,CONFIG_FILE)
+    # 基线的头文件
+    print('    -> include')
+    json_root['include'] = my_file_create_subgroup(INCLUDE_PATH)
+else:
+    # 按照 depend.json 指定的基线中的开源组件进行加载
+    print('    -> components')
+    h_list=[]
+    components_list=depend['base']['components']
+    for component in components_list:
+        print('        -> '+component)
+        json_root['components'][component] = my_file_create_subgroup(COMP_PATH+"/"+component,CONFIG_FILE)
 
-        # 按照 depend.json 指定的基线中的闭源组建进行加载
-        print('    -> libs')
-        h_list=[]
-        c_list=[]
-        l_list=[]
-        libs_list=depend['base']['libs']
-        for lib in libs_list:
-            print('        -> '+lib)
-            lib_name = lib.split(".")[0]
-            if lib_name.startswith('lib'):
-                lib_name = lib_name[3:]
-            
-            lib_path = "$PROJECT_ROOT/libs/"+lib
-            lib_head_file_path = "$PROJECT_ROOT/include/components/"+lib_name+"/include"
-            l_list.append(lib_path)
-            h_list.append(lib_head_file_path)
-            
-        json_root['libs'] = {'c_files':list(set(c_list)),'h_dir':list(set(h_list)),'l_files':list(set(l_list))}
-        json_root['include']['vendor'] = my_file_create_subgroup(INCLUDE_PATH+'/vendor')
-        json_root['include']['base'] = my_file_create_subgroup(INCLUDE_PATH+'/base')
+        # Zibgee 工程生成的开源库，其 .c 和蓝牙一样放置; 其 .h 放置方式和 lib 方式一样（放在 include/components/xxx/include 中）
+        # 为了兼容，做下面处理
+        lib_head_file_path = "include/components/"+component+"/include"
+        if os.path.exists(lib_head_file_path):
+            l_list.append('$PROJECT_ROOT/'+lib_path)
+
+    # 按照 depend.json 指定的基线中的闭源组建进行加载
+    print('    -> libs')
+    l_list=[]
+    libs_list=depend['base']['libs']
+    for lib in libs_list:
+        print('        -> '+lib)
+        lib_name = lib.split(".")[0]
+        if lib_name.startswith('lib'):
+            lib_name = lib_name[3:]
+        
+        lib_path = "$PROJECT_ROOT/libs/"+lib
+        l_list.append(lib_path)   
+
+        lib_head_file_path = "include/components/"+lib_name+"/include"
+        if os.path.exists(lib_head_file_path):
+            h_list.append('$PROJECT_ROOT/'+lib_head_file_path)
+
+        
+    json_root['libs'] = {'h_dir':list(set(h_list)),'l_files':list(set(l_list))}
+    json_root['include']['vendor'] = my_file_create_subgroup(INCLUDE_PATH+'/vendor')
+    json_root['include']['base'] = my_file_create_subgroup(INCLUDE_PATH+'/base')
 ```
 
 
