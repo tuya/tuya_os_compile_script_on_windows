@@ -90,7 +90,7 @@ else:
         # 为了兼容，做下面处理
         lib_head_file_path = "include/components/"+component+"/include"
         if os.path.exists(lib_head_file_path):
-            l_list.append('$PROJECT_ROOT/'+lib_path)
+            h_list.append('$PROJECT_ROOT/'+lib_head_file_path)
 
     # 按照 depend.json 指定的基线中的闭源组建进行加载
     print('    -> libs')
@@ -109,11 +109,14 @@ else:
         if os.path.exists(lib_head_file_path):
             h_list.append('$PROJECT_ROOT/'+lib_head_file_path)
 
-        
-    json_root['libs'] = {'h_dir':list(set(h_list)),'l_files':list(set(l_list))}
+    # 保证 depend 的库的顺序就是链接顺序，因为zigbee 需要支持按照指定顺序链接
+    # json_root['libs'] = {'h_dir':list(set(h_list)),'l_files':list(set(l_list))}
+    json_root['libs'] = {'h_dir':list(set(h_list)),'l_files':list(dict.fromkeys(l_list))}   
     json_root['include']['vendor'] = my_file_create_subgroup(INCLUDE_PATH+'/vendor')
     json_root['include']['base'] = my_file_create_subgroup(INCLUDE_PATH+'/base')
 ```
+
+修复BUG：
 
 
 

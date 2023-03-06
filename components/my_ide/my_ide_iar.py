@@ -34,7 +34,7 @@ class my_ide_iar(my_ide_base):
 
     def tbuild(self):
         print('\nBUILD')
-        cmd = 'IarBuild.exe ./.log/Demo.ewp -build * -log all'
+        cmd = 'IarBuild.exe ./.log/Demo.ewp -build * -log info'
         print('> [path]:'+self.uv4_path)
         print('> [cmd]:'+cmd)
         print('> wait about 2 min ...')
