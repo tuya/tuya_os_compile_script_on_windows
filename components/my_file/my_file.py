@@ -19,7 +19,8 @@ def my_file_copy_files_to(files,dst_path):
         my_file_clear_folder(dst_path)
 
     for file in files:
-        shutil.copy(file,dst_path)
+        if os.path.exists(file):
+            shutil.copy(file,dst_path)
 
 def my_file_copy_file_to_file(file_from,file_to):
     shutil.copy(file_from,file_to)
