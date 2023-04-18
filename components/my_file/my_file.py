@@ -149,6 +149,13 @@ def my_file_save_json(json_file, json_root):
 # 如果该目录下本来就有 subdir.json，则用这个里面的
 # 如果该目录下本来就有 subdir.mk， 则用 kconfig
 # 如果过滤为空，则全部都加
+def __list_distinct_and_sort(mlist):
+    if len(mlist) == 0:
+        return mlist
+    else:
+        #https://www.zhihu.com/question/57741762
+        return sorted(list(dict.fromkeys(mlist)))
+
 def my_file_create_subgroup(SOURCES_ROOT,CONFIG_FILE="",filter=""):
     h_list=[]
     c_list=[]
@@ -187,7 +194,7 @@ def my_file_create_subgroup(SOURCES_ROOT,CONFIG_FILE="",filter=""):
                     if file.endswith(".h"):
                         h_list.append(my_root)
 
-        ret = {'c_files':list(set(c_list)),'h_dir':list(set(h_list)),'l_files':list(set(l_list))}
+        ret = {'c_files':__list_distinct_and_sort(c_list),'h_dir':__list_distinct_and_sort(h_list),'l_files':__list_distinct_and_sort(l_list)}
 
     return ret
 

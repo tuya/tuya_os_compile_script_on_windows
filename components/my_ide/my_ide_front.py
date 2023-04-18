@@ -157,7 +157,7 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
                 h_list.append('$PROJECT_ROOT/'+lib_head_file_path)
 
             
-        json_root['libs'] = {'h_dir':list(set(h_list)),'l_files':list(dict.fromkeys(l_list))}
+        json_root['libs'] = {'h_dir':list(dict.fromkeys(h_list)),'l_files':list(dict.fromkeys(l_list))}
         json_root['include']['vendor'] = my_file_create_subgroup(INCLUDE_PATH+'/vendor')
         json_root['include']['base'] = my_file_create_subgroup(INCLUDE_PATH+'/base')
 

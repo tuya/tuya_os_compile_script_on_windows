@@ -110,8 +110,8 @@ else:
             h_list.append('$PROJECT_ROOT/'+lib_head_file_path)
 
     # 保证 depend 的库的顺序就是链接顺序，因为zigbee 需要支持按照指定顺序链接
-    # json_root['libs'] = {'h_dir':list(set(h_list)),'l_files':list(set(l_list))}
-    json_root['libs'] = {'h_dir':list(set(h_list)),'l_files':list(dict.fromkeys(l_list))}   
+    # json_root['libs'] = {'h_dir':list(dict.fromkeys(h_list)),'l_files':list(dict.fromkeys(l_list))}
+    json_root['libs'] = {'h_dir':list(dict.fromkeys(h_list)),'l_files':list(dict.fromkeys(l_list))}   
     json_root['include']['vendor'] = my_file_create_subgroup(INCLUDE_PATH+'/vendor')
     json_root['include']['base'] = my_file_create_subgroup(INCLUDE_PATH+'/base')
 ```
