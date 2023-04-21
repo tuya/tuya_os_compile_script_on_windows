@@ -84,7 +84,7 @@ def conf2h(conf, header, fw_name, fw_version, board_name):
         header_f.write('#define FW_VERSION              "'+fw_version+'"\n')
         header_f.write('#define FW_VERSION_HEX          '+__version_string_to_hex(fw_version,'zigbee')+'\n')
     elif board_name.endswith('_adv'):
-        header_f.write('#define FIRMWARE_NAME           "'+fw_name[0:40]+'"\n')
+        header_f.write('#define FIRMWARE_NAME           "'+fw_name+'"\n')
         header_f.write('#define FIRMWARE_VERSION        "'+fw_version+'"\n')
         header_f.write('#define FIRMWARE_VERSION_HEX    '+__version_string_to_hex(fw_version,'beacon')+'\n')        
     else:
