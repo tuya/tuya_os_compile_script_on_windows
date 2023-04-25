@@ -23,7 +23,7 @@ def __version_string_to_hex(version,kind=None):
             print("version input format error! x.x.x (max:3.3.15)")
             exit(1)
     elif kind == 'beacon':
-        if len(nums) == 2 and int(nums[0])<16 and int(nums[1])<16:
+        if len(nums) >= 2 and int(nums[0])<16 and int(nums[1])<16:
             version_int = (int(nums[1]) << 4) | int(nums[0])
             version_hex = "{:#1x}".format(version_int)
         else:
