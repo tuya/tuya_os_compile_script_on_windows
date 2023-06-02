@@ -153,7 +153,7 @@ class my_ide_keil4(my_ide_base):
         # tal_xxx -> tal_xxx 
         GROUP_NAME_SPLIT = GROUP_NAME.split('/')
         if GROUP_NAME_SPLIT[0] == 'app_comp':
-            GROUP_NAME = 'app/comp'
+            GROUP_NAME = 'app/component'
         elif GROUP_NAME_SPLIT[0] == 'app_driver':
             GROUP_NAME = 'app/driver'
         elif GROUP_NAME_SPLIT[0] == 'app_libs':

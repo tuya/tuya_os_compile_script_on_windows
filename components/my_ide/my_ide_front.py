@@ -56,10 +56,10 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
             }
         },
         'app':{},
-        'components':{},
+        'app_libs':{},
         'application_components':{},
         'libs':{},
-        'app_libs':{},
+        'components':{},
         'include':{},
         'adapter':{},
         'tkl':{
