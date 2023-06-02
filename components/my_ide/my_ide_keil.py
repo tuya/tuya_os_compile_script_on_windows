@@ -149,26 +149,59 @@ class my_ide_keil(my_ide_base):
         tree = ET.parse(uvprojx_path)
         root = tree.getroot()
 
+        # comp/tal_xxx -> comp
+        # tal_xxx -> tal_xxx 
+        GROUP_NAME_SPLIT = GROUP_NAME.split('/')
+        if GROUP_NAME_SPLIT[0] == 'comp':
+            GROUP_NAME = 'tal'
+        elif GROUP_NAME_SPLIT[0] == 'vendor':
+            GROUP_NAME = GROUP_NAME_SPLIT[0]+'/'+GROUP_NAME_SPLIT[2]
+        else:
+            GROUP_NAME = GROUP_NAME_SPLIT[0]
+
         if KIND == '.c' or KIND == '.lib' or KIND == '.s':
-            Groups = root.find("Targets").find("Target").find("Groups")
-            Group = ET.Element('Group')
-            GroupName = ET.SubElement(Group, 'GroupName')
-            GroupName.text = GROUP_NAME
-            Files = ET.SubElement(Group, 'Files')
-
             kind_map = {'.c' : '1', '.lib' : '4', '.s' : '2'}
+            Groups = root.find("Targets").find("Target").find("Groups")
+           
+            # 查找同名 Group，然后将这些同名的文件加入到一起
+            GPs = Groups.findall("Group")
+            gp_find = None
+            for gp in GPs:
+                if gp.find("GroupName").text == GROUP_NAME:
+                    gp_find = gp
+                    break
 
-            for file in LIST:
-                if file.endswith(KIND):
-                    File = ET.SubElement(Files, 'File')
-                    FileName = ET.SubElement(File, 'FileName')
-                    FileName.text = os.path.basename(file) 
-                    FileType = ET.SubElement(File, 'FileType')
-                    FileType.text = kind_map[KIND]
-                    FilePath = ET.SubElement(File, 'FilePath')
-                    FilePath.text = file
-            Groups.insert(self.insert_group_num, Group)
-            self.insert_group_num+=1
+            if gp_find != None:
+                Files = gp_find.find("Files")
+
+                for file in LIST:
+                    if file.endswith(KIND):
+                        File = ET.SubElement(Files, 'File')
+                        FileName = ET.SubElement(File, 'FileName')
+                        FileName.text = os.path.basename(file) 
+                        FileType = ET.SubElement(File, 'FileType')
+                        FileType.text = kind_map[KIND]
+                        FilePath = ET.SubElement(File, 'FilePath')
+                        FilePath.text = file
+
+                        Files.append(File)
+            else:
+                Group = ET.Element('Group')
+                GroupName = ET.SubElement(Group, 'GroupName')
+                GroupName.text = GROUP_NAME
+                Files = ET.SubElement(Group, 'Files')
+
+                for file in LIST:
+                    if file.endswith(KIND):
+                        File = ET.SubElement(Files, 'File')
+                        FileName = ET.SubElement(File, 'FileName')
+                        FileName.text = os.path.basename(file) 
+                        FileType = ET.SubElement(File, 'FileType')
+                        FileType.text = kind_map[KIND]
+                        FilePath = ET.SubElement(File, 'FilePath')
+                        FilePath.text = file
+                Groups.insert(self.insert_group_num, Group)
+                self.insert_group_num+=1
             
             ET.indent(tree) # format
             tree.write(uvprojx_path, encoding='utf-8', xml_declaration=True)
