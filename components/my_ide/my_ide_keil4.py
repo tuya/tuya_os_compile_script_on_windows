@@ -152,8 +152,18 @@ class my_ide_keil4(my_ide_base):
         # comp/tal_xxx -> comp
         # tal_xxx -> tal_xxx 
         GROUP_NAME_SPLIT = GROUP_NAME.split('/')
-        if GROUP_NAME_SPLIT[0] == 'comp':
-            GROUP_NAME = 'tal'
+        if GROUP_NAME_SPLIT[0] == 'app_comp':
+            GROUP_NAME = 'app/comp'
+        elif GROUP_NAME_SPLIT[0] == 'app_driver':
+            GROUP_NAME = 'app/driver'
+        elif GROUP_NAME_SPLIT[0] == 'app_libs':
+            GROUP_NAME = 'app/lib'   
+        elif GROUP_NAME_SPLIT[0] == 'comp':
+            GROUP_NAME = 'tuyaos/tal'
+        elif GROUP_NAME_SPLIT[0] == 'tkl':
+            GROUP_NAME = 'tuyaos/tkl'
+        elif GROUP_NAME_SPLIT[0] == 'libs':
+            GROUP_NAME = 'tuyaos/lib'
         elif GROUP_NAME_SPLIT[0] == 'vendor':
             GROUP_NAME = GROUP_NAME_SPLIT[0]+'/'+GROUP_NAME_SPLIT[2]
         else:
