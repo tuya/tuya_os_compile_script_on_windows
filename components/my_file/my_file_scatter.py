@@ -119,12 +119,16 @@ class my_file_scatter:
                     
                     if GroupName.text == None:
                         pass
-                    elif GroupName.text == 'app' or \
-                        GroupName.text.startswith('comp/') == True or \
-                        GroupName.text.startswith('app_comp/') == True or \
-                        GroupName.text.startswith('tkl/') == True:
-                        insert.append('	' + os.path.splitext(FileName.text)[0] + '.o (+RO)\n')
-                    elif GroupName.text == 'libs/libs':
+                         elif GroupName.text == 'app' or \
+                        GroupName.text.startswith('app/component') == True or \
+                        GroupName.text.startswith('app/driver') == True or \
+
+                   
+                        GroupName.text.startswith('tuyaos/tal') == True or \
+                        GroupName.text.startswith('tuyaos/tkl') == True:
+                        insert.append('        ' + os.path.splitext(FileName.text)[0] + '.o (+RO)\n')
+                    elif GroupName.text.startswith('tuyaos/lib') == True or \
+                        GroupName.text.startswith('app/lib') == True or \
                         # insert.append('	' + os.path.splitext(FileName.text)[0] + '.lib (+RO)\n')
                         uvprojx_path = os.path.dirname(uvprojx_file)
                         lib_path = uvprojx_path + '/' + FilePath.text
