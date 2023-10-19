@@ -91,7 +91,8 @@ def readonly_handler(func, path, execinfo):
 
 # 删除一个文件
 def my_file_rm_file(file):
-    os.remove(file)
+    if os.path.exists(file):
+        os.remove(file)
 
 
 # 将文件中的一个老的字符串替换为新的

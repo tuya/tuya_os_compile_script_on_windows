@@ -43,7 +43,7 @@ class my_ide_gcc(my_ide_base):
         Note.write(self.var_map['$O_FILES'])
         Note.close()
         # ld
-        cmd = self.cmd['ld'];
+        cmd = self.cmd['ld']
         print("\n[ld] %s"%(cmd))
         my_exe_simple(cmd,1,evn,self.var_map)
 
@@ -112,10 +112,13 @@ class my_ide_gcc(my_ide_base):
             for line in f.readlines():
                 line = line.lstrip()
                 line = line.strip('\n')
+                line = line.replace(":", " ")
                 list_n = line.split(' ')
                 for file in list_n:
                     if(file == '\\'):
-                        break
+                        continue
+                    if(file == ""):
+                        continue
                     try:
                         if(os.path.getmtime(file) > os.path.getmtime(dep_file)):
                             return True
@@ -141,13 +144,23 @@ class my_ide_gcc(my_ide_base):
             Note.write(self.src['h_dir_str'])
             Note.close()
 
-            if((os.path.exists(d_file) == True) and (self.if_need_rebuild(d_file) == False)):
+            if((os.path.exists(o_file) == True) and (os.path.exists(d_file) == True) and (self.if_need_rebuild(d_file) == False)):
                 return o_file
             if (os.path.exists(o_file)):
                 my_file_rm_file(o_file)
             cmd = "%s %s @%s -c %s -o %s %s -MMD -MF %s"%(cc,c_flags,gcc_h_file,file,o_file,c_macros, d_file)
         elif kind == '.s':
-            cmd = "%s %s -c %s -o %s"%(asm,s_flags,file,o_file)
+            gcc_h_file = out_path+'/'+'gcc_h.txt'
+            Note=open(gcc_h_file,mode='w')
+            Note.write(self.src['h_dir_str'])
+            Note.close()
+
+            if((os.path.exists(o_file) == True) and (os.path.exists(d_file) == True) and (self.if_need_rebuild(d_file) == False)):
+                return o_file
+            if (os.path.exists(o_file)):
+                my_file_rm_file(o_file)
+
+            cmd = "%s %s @%s -c %s -o %s"%(asm,s_flags,gcc_h_file,file,o_file)
             
         my_exe_simple(cmd,1,evn,self.var_map)
         
