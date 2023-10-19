@@ -75,7 +75,7 @@ def my_ide_front(project_path,app_path,vendor_name,output_path,firmware_name,fir
     # -----------------------------------------------------------------------------------------------
     print('CREATE:')
     print('    -> apps/'+my_file_path_formart(app_path))
-    json_root['app'] = my_file_create_subgroup(APP_PATH)
+    json_root['app'] = my_file_create_subgroup(APP_PATH,CONFIG_FILE)
 
     # 应用目录中的 component（一般时应用组件）
     print('    -> application_components')
