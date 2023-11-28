@@ -78,7 +78,7 @@ class my_ide_sdcc(my_ide_base):
             if k in libs:
                 print('    ->[Y]',k)
                 # create lib
-                cur_lib = libs_path+'/lib'+k+'.a' 
+                cur_lib = libs_path+'/lib'+k+'.lib' 
                 cur_o_files = ''
 
                 for c_file in v['c_files']:
