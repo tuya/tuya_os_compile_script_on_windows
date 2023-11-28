@@ -15,6 +15,7 @@ depend.check()
 from my_template.my_template import my_template
 from my_kconfig.my_kconfig import my_kconfig
 from my_ide.my_ide_gcc import *
+from my_ide.my_ide_sdcc import *
 from my_ide.my_ide_keil import *
 from my_ide.my_ide_cdk import *
 from my_ide.my_ide_codeblocks import *
@@ -33,6 +34,8 @@ def ide_tool_front(project_path,app_path,vendor_name,output_path,firmware_name,f
 def ide_tool_back(OP,JSON_FILE,KIND='gcc'):    
     if KIND == 'gcc':
         ide = my_ide_gcc(JSON_FILE)
+    elif KIND == 'sdcc':
+        ide = my_ide_sdcc(JSON_FILE)
     elif KIND == 'keil':
         ide = my_ide_keil(JSON_FILE)
     elif KIND == 'cdk':
