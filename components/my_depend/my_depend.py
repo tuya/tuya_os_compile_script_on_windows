@@ -3,6 +3,7 @@
 import os
 import sys
 import pip
+import subprocess
 
 class my_depend():
     def __init__(self):
@@ -30,6 +31,17 @@ class my_depend():
             import lxml
         except ImportError as e:
             self.__check_and_install('lxml','lxml')
+
+        try:
+            import yaml
+        except ImportError as e:
+            self.__check_and_install('pyyaml','pyyaml')
+
+        try:
+            import psutil
+        except ImportError as e:
+            self.__check_and_install('psutil','psutil')
+
             
         try:
             import curses
@@ -40,4 +52,5 @@ class my_depend():
     def __check_and_install(self,KEY,MODULE):
         if not KEY in sys.modules.keys():
             print('install',MODULE)
-            pip.main(['install', MODULE])
+            # pip.main(['install', MODULE])
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', MODULE])
