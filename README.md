@@ -21,7 +21,7 @@
 该 ide_tool 能够处理 **基线、品类、应用**，他们分别涉及的目录如下：
 
 条目 | 路径 | 基线目录 | 品类目录 | 应用目录
----|---|--|---
+---|---|---|---|---
 APP_PATH | PROJECT_PATH+"/"+my_file_path_formart(app_path) | 应用目录 | 应用目录   | 应用目录
 APP_COMP_PATH | APP_PATH+"/app.components" 				   | 		 |  		| 应用组件    
 APPx_COMP_PATH | PROJECT_PATH+"/application_components"    | 		 | 应用组件   |
@@ -201,10 +201,13 @@ else:
 **备注：** 特殊的，由于 `_tlib` 对开源组件的处理会只提取有用 .c 和 .h，对于基线是这个要求，但是对于应用和品类就需要将 config 带出去。因此在上述 3）中需要在调用 `_tlib` 前，需要提前筛选出 `self.output['sdk']['components']` 中的开源部分，进行特殊提取。
 
 
+</br>
+
+## 三、文档
 
 - [01-tag_support_app_package.md](./docs/01-tag_support_app_package.md)
 - [02-tag_my_exe_get_install_path.md](./docs/02-tag_my_exe_get_install_path.md)
 - [03-tag_support_app_config_need_libs.md](./docs/03-tag_support_app_config_need_libs.md)
 - [04-tag_support_after_make_call_user_python_scripts.md](./docs/04-tag_support_after_make_call_user_python_scripts.md)
-
+- [05-tag_support_files_sort.md](./docs/05-tag_support_files_sort.md)
 
