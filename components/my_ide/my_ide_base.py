@@ -51,7 +51,18 @@ class my_ide_base(object):
             print('#1. fill the output dict')
             tool = load_dict['tool'][self.ide_kind]
             self.output = load_dict['output']
-            self.output['sdk'].update({'components':load_dict['components']})
+           
+            # 应用的打库目标从 application_components 和 application_drivers 中选择
+            # 基线的打库目标从 components 中选择
+            if self.output['kind'] == 'apps':
+                # self.output['sdk'].update({'components':{**load_dict['application_components'],**load_dict['application_drivers']}})
+                self.output['sdk'].update({'application_components':load_dict['application_components']})
+                self.output['sdk'].update({'application_drivers':load_dict['application_drivers']})
+            elif self.output['kind'] == 'samples':
+                self.output['sdk'].update({'components':load_dict['components']})
+            else:
+                print('error')
+
             self.output['fw'].update({'output':tool['output']})
             
             print('#2. fill the cmd dict')
@@ -199,6 +210,7 @@ class my_ide_base(object):
         src_path        = app_path + '/src'
         inc_path        = app_path + '/include'
         comp_path       = app_path + '/app.components'
+        drivers_path    = app_path + '/app.drivers'
         libs_path       = app_path + '/app.libs/src'
         incs_path       = app_path + '/app.libs/include'
         build_path      = app_path + '/build'
@@ -212,6 +224,7 @@ class my_ide_base(object):
         my_file_copy_dir_to(src_root,src_path)
         my_file_copy_dir_to(inc_root,inc_path)
         my_file_clear_folder(comp_path)
+        my_file_clear_folder(drivers_path)
         my_file_clear_folder(libs_path)
         my_file_clear_folder(incs_path)
         my_file_clear_folder(build_path)
@@ -221,34 +234,30 @@ class my_ide_base(object):
                                app_root+'/local.mk',
                                app_root+'/README.md'],app_path)
        
-        # 剔除基线的组件，否则会将基线的组件打包到应用包中
-        libs = self.output['sdk']['libs']        
-        base_comp = []
-        for k,v in self.output['sdk']['components'].items():
-            if k.startswith('tal_') or k == 'app_tuya_driver':#app_tuya_driver 是基线的一个命名非常奇怪的组件
-                base_comp.append(k)
-            elif k not in libs:# 应用组件，支持将 kconfig 携带
-                src1_comp_path = self.output['project_path']+'/components/'+k
-                src2_comp_path = self.output['project_path']+'/application_components/'+k
-                if os.path.exists(src1_comp_path):
-                    src_comp_path = src1_comp_path
-                elif os.path.exists(src2_comp_path):
-                    src_comp_path = src2_comp_path
-
-                dst_comp_path = comp_path+'/'+k
-                my_file_copy_dir_to(src_comp_path,dst_comp_path)
-                my_file_rm_dir(dst_comp_path+'/.git') 
-                
-                # 也剔除掉，因为 _tlib 自带对不打库的组件进行源码复制，我们这里自己处理了，就要将其剔除
-                base_comp.append(k) 
-
-        for k in base_comp:
-            self.output['sdk']['components'].pop(k)
-
-        print(self.output['sdk']['components'])  
-        print('#2. use _tlib to greate the libs ...')   
-        self._tlib(libs_path,incs_path,comp_path,self.__log_path)
     
+        print('#2. use _tlib to greate the libs ...')
+        def app_tlib(ITEM,ITEM_PATH,):
+            libs = self.output['sdk']['libs']
+            base_comp = []
+            self.output['sdk']['components'] = self.output['sdk'].pop(ITEM)
+            for k,v in self.output['sdk']['components'].items():
+                if k not in libs:# 应用组件，支持将 kconfig 携带
+                    src_comp_path = self.output['project_path']+'/'+ITEM+'/'+k
+                    if os.path.exists(src_comp_path):
+                        dst_comp_path = ITEM_PATH+'/'+k
+                        my_file_copy_dir_to(src_comp_path,dst_comp_path)
+                        my_file_rm_dir(dst_comp_path+'/.git')
+                        base_comp.append(k)
+            for k in base_comp:
+                self.output['sdk']['components'].pop(k)
+            self._tlib(libs_path,incs_path,ITEM_PATH,self.__log_path)
+            print('-> to comp:')
+            for k in base_comp:
+                print('    ->[N] '+k) 
+        
+        app_tlib('application_components',comp_path)
+        app_tlib('application_drivers',drivers_path)
+
     # 形成 SDK 中用库的函数
     def _tlib(self,libs_path,incs_path,comp_path,log_path):
         print('#4. Create libs...')
@@ -299,6 +308,8 @@ class my_ide_base(object):
                         group_name = 'comp'
                     elif k == 'application_components':
                         group_name = 'app_comp'
+                    elif k == 'application_drivers':
+                        group_name = 'app_driver'
                     else:
                         group_name = k
                 else:

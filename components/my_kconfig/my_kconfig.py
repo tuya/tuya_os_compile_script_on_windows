@@ -31,6 +31,8 @@ def my_kconfig(project_path,app_path,fw_name,fw_version,board_name,auto=0,gui=1)
     COMP_PATH=PROJECT_PATH+"/components"
     APP_COMP_PATH=APP_PATH+"/app.components"
     APPx_COMP_PATH=PROJECT_PATH+"/application_components"
+    APP_DRIVERS_PATH=APP_PATH+"/app.drivers"
+    APPx_DRIVERS_PATH=PROJECT_PATH+"/application_drivers"
     BUILD_PATH=PROJECT_PATH+"/build"
     CONFIG_FILE=BUILD_PATH+"/tuya_iot.config"
 
@@ -57,37 +59,29 @@ def my_kconfig(project_path,app_path,fw_name,fw_version,board_name,auto=0,gui=1)
         kconfig_str+='endmenu\n\n'
 
         kconfig_str+='menu "COMP"\n'
-        components_list=[]
-        for root, dirs, files in os.walk(COMP_PATH):
-            components_list = dirs
-            break
+        def append_kconfig(ITEM_PATH):
+            KCONFIG_STR=''
+            components_list=[]
+            for root, dirs, files in os.walk(ITEM_PATH):
+                components_list = dirs
+                break
 
-        for component in components_list:
-            kcfg = COMP_PATH+'/'+component+'/IoTOSconfig'
-            if os.path.exists(kcfg):
-                kconfig_str+=('\trsource\t.'+kcfg+'\n')
-
-        for root, dirs, files in os.walk(APP_COMP_PATH):
-            components_list = dirs
-            break
-
-        for component in components_list:
-            kcfg = APP_COMP_PATH+'/'+component+'/IoTOSconfig'
-            if os.path.exists(kcfg):
-                kconfig_str+=('\trsource\t.'+kcfg+'\n')
-
-        for root, dirs, files in os.walk(APPx_COMP_PATH):
-            components_list = dirs
-            break
-
-        for component in components_list:
-            kcfg = APPx_COMP_PATH+'/'+component+'/IoTOSconfig'
-            if os.path.exists(kcfg):
-                kconfig_str+=('\trsource\t.'+kcfg+'\n')
-
+            for component in components_list:
+                kcfg = ITEM_PATH+'/'+component+'/IoTOSconfig'
+                if os.path.exists(kcfg):
+                    KCONFIG_STR+=('\trsource\t.'+kcfg+'\n')
+            
+            return KCONFIG_STR
+        
+        kconfig_str += append_kconfig(COMP_PATH)
+        kconfig_str += append_kconfig(APP_COMP_PATH)
+        kconfig_str += append_kconfig(APPx_COMP_PATH)
+        kconfig_str += append_kconfig(APP_DRIVERS_PATH)
+        kconfig_str += append_kconfig(APPx_DRIVERS_PATH)
+        
         kconfig_str+='endmenu\n\n'
         
-        # print(kconfig_str)
+        print(kconfig_str)
 
         # -----------------------------------------------------------------------------------------------
         print('    > WRITE TO IoTOSconfig:')
