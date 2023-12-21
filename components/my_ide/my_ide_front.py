@@ -56,6 +56,7 @@ def _front_libs(APP_LIBS_PATH,LIBS_PATH,INCLUDE_PATH,JSON_ROOT,DEPEND):
         # 按照 DEPEND.json 指定的基线中的闭源组建进行加载
         print('    -> libs')
         l_list=[]
+        h_list=[]
         app_l_list=[]
         libs_list=DEPEND['base']['libs']
         for lib in libs_list:
@@ -73,10 +74,10 @@ def _front_libs(APP_LIBS_PATH,LIBS_PATH,INCLUDE_PATH,JSON_ROOT,DEPEND):
 
             lib_head_file_path = "include/components/"+lib_name+"/include"
             if os.path.exists(lib_head_file_path):
-                H_LIST.append('$PROJECT_ROOT/'+lib_head_file_path)
+                h_list.append('$PROJECT_ROOT/'+lib_head_file_path)
 
         JSON_ROOT['app_libs'] = {'l_files':list(dict.fromkeys(app_l_list))}
-        JSON_ROOT['libs'] = {'h_dir':list(dict.fromkeys(H_LIST)),'l_files':list(dict.fromkeys(l_list))}
+        JSON_ROOT['libs'] = {'h_dir':list(dict.fromkeys(h_list)),'l_files':list(dict.fromkeys(l_list))}
         JSON_ROOT['include']['vendor'] = my_file_create_subgroup(INCLUDE_PATH+'/vendor')
         JSON_ROOT['include']['base'] = my_file_create_subgroup(INCLUDE_PATH+'/base')
 
