@@ -44,7 +44,8 @@ class my_ide_iar930(my_ide_base):
         DEMO_NAME = self.output['fw']['name']
         DEMO_FIRMWARE_VERSION =  self.output['fw']['ver']
 
-        cmd = 'python3 ./.log/postbuild.py %s "%s"'%(DEMO_NAME, DEMO_FIRMWARE_VERSION)
+        PYTHON_PATH = sys.executable
+        cmd = '%s ./.log/postbuild.py %s "%s"'%(PYTHON_PATH,DEMO_NAME, DEMO_FIRMWARE_VERSION)
         my_exe_simple(cmd,1,None,None)
 
         my_ide_base.tbuild(self)
