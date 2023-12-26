@@ -98,7 +98,7 @@ class my_ide_base(object):
         after_make_python = './.log/after_make.py' 
         if os.path.exists(after_make_python):
             PYTHON_PATH = sys.executable
-            after_make_cmd = PYTHON_PATH + ' ' + after_make_python
+            after_make_cmd = '"%s" %s'%(PYTHON_PATH,after_make_python)
             my_exe_simple(after_make_cmd,1,None,self.var_map)
             
     # 编译
