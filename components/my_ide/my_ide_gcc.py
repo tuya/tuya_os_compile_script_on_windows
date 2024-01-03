@@ -29,8 +29,9 @@ class my_ide_gcc(my_ide_base):
 
         # c to .o
         for c_file in self.src['c_files']:
-            self.__compile('.c',c_file,log_path,evn)
-            print("[cc] %s"%(c_file))
+            if c_file != "":
+                self.__compile('.c',c_file,log_path,evn)
+                print("[cc] %s"%(c_file))
             
         # .s to .o
         for s_file in self.src['s_files']:
