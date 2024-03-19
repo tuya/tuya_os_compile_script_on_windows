@@ -41,6 +41,11 @@ class my_depend():
             import psutil
         except ImportError as e:
             self.__check_and_install('psutil','psutil')
+    
+        try:
+            import tkinter
+        except ImportError as e:
+            self.__check_and_install('tkinter','tkinter')
 
             
         try:
