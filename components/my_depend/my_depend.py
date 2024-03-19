@@ -45,7 +45,7 @@ class my_depend():
         try:
             import tkinter
         except ImportError as e:
-            self.__check_and_install('tkinter','tkinter')
+            self.__check_and_install('tk','tk')
 
             
         try:
