@@ -3,8 +3,11 @@
 import subprocess, os, sys
 import json
 import platform
-import tkinter
-from tkinter import Label, Button, filedialog
+try:
+    import tkinter
+    from tkinter import Label, Button, filedialog
+except:
+    print("no tkinter module for UGI to chose the IDE!")
 
 my_exe_file_dir = os.path.dirname(__file__)  # 当前文件所在的目录
 sys.path.append(my_exe_file_dir+'/../components')

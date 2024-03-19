@@ -43,12 +43,6 @@ class my_depend():
             self.__check_and_install('psutil','psutil')
     
         try:
-            import tkinter
-        except ImportError as e:
-            self.__check_and_install('tk','tk')
-
-            
-        try:
             import curses
         except ImportError as e:
             if _IS_WINDOWS:
