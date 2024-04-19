@@ -6,7 +6,7 @@ num=$#
 cmd=$1
 
 declare -A dic
-dic=([a]="apps" [c]="components" [ac]="application_components" [v]="vendor")
+dic=([a]="apps" [c]="components" [ac]="application_components" [v]="vendor" [ad]="adapter")
 
 function GIT_STATUS(){
     echo $1+"------------------------"
@@ -25,6 +25,7 @@ function GIT_STATUS(){
         if [ ! -d ".git" ]; then
             echo "  - no git!"
         else
+	        git config core.filemode false
             git status -s
         fi
 
@@ -69,6 +70,7 @@ if [ "$cmd" == "s" ];then
     if [ $num == 1 ];then
         GIT_STATUS application_components
         GIT_STATUS components
+        GIT_STATUS adapter
         GIT_STATUS vendor
         GIT_STATUS apps
     fi
@@ -80,6 +82,7 @@ elif [ "$cmd" == "d" ];then
     if [ $num == 1 ];then
         GIT_DIFF application_components
         GIT_DIFF "dirs" components
+	    GIT_DIFF "dirs" adapter
         GIT_DIFF "dirs" vendor
         GIT_DIFF "dirs" apps
     fi
@@ -102,6 +105,7 @@ else
     echo " -> a: app sub_dir"
     echo " -> c: components sub_dir"
     echo " -> ac: application_components sub_dir"
+    echo " -> ad: adapter"
     echo " -> v: vendor sub_dir"
     echo " "
 
