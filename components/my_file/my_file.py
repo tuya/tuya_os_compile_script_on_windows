@@ -35,7 +35,8 @@ def my_file_copy_one_kind_files_to(src_paths,kind,dst_path):
 # 将一个目录复制到另一个目录，如果另一个目录已经存在，则删除之
 def my_file_copy_dir_to(from_path,dst_path):
     my_file_rm_dir(dst_path) 
-    shutil.copytree(from_path,dst_path)
+    if os.path.exists(from_path):
+        shutil.copytree(from_path,dst_path)
 
 # 将一个目录下的所有内容复制到另一个文件夹，如果另一个目录不存在，则创建
 def my_file_copy_dir_contents_to(from_path,dst_path):

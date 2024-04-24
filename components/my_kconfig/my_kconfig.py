@@ -45,6 +45,9 @@ def my_kconfig(project_path,app_path,fw_name,fw_version,board_name,auto=0,gui=1)
         KCONFIG_FILE=BUILD_PATH+"/IoTOSconfig"
 
     HEAD_FILE=APP_PATH+"/app_config.h"
+    HEAD_FILE_BEFORE=APP_PATH+"/app_config_before.in"
+    HEAD_FILE_AFTER=APP_PATH+"/app_config_after.in"
+
 
     # -----------------------------------------------------------------------------------------------   
     if auto == 0:
@@ -106,7 +109,7 @@ def my_kconfig(project_path,app_path,fw_name,fw_version,board_name,auto=0,gui=1)
             # -----------------------------------------------------------------------------------------------
             print('    > Create HEAD_FILE = %s'%(HEAD_FILE))
             print('    > Copy %s To %s\n'%(CONFIG_FILE,CONFIG_FILE_BK))
-            conf2h(CONFIG_FILE,HEAD_FILE,fw_name,fw_version,board_name)    
+            conf2h(CONFIG_FILE,HEAD_FILE,HEAD_FILE_BEFORE,HEAD_FILE_AFTER,fw_name,fw_version,board_name)    
             shutil.copy(CONFIG_FILE,CONFIG_FILE_BK)
     
     else:
@@ -119,7 +122,7 @@ def my_kconfig(project_path,app_path,fw_name,fw_version,board_name,auto=0,gui=1)
             shutil.copy(CONFIG_FILE_BK,CONFIG_FILE)
 
             print('    > Create HEAD_FILE = %s\n'%(HEAD_FILE))
-            conf2h(CONFIG_FILE,HEAD_FILE,fw_name,fw_version,board_name)    
+            conf2h(CONFIG_FILE,HEAD_FILE,HEAD_FILE_BEFORE,HEAD_FILE_AFTER,fw_name,fw_version,board_name)    
 
         else:
             print('    > Check %s not exists'%(CONFIG_FILE_BK))

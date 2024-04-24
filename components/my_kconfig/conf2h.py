@@ -39,7 +39,7 @@ def __version_string_to_hex(version,kind=None):
     
     
 
-def conf2h(conf, header, fw_name, fw_version, board_name):
+def conf2h(conf, header, header_before, header_after, fw_name, fw_version, board_name):
     header_f = open(header, 'w', encoding="utf-8")
     
     # 填充头部
@@ -50,6 +50,11 @@ def conf2h(conf, header, fw_name, fw_version, board_name):
     header_f.write('#ifndef __APP_CONFIG_H__\n')
     header_f.write('#define __APP_CONFIG_H__\n')
     header_f.write('\n')
+
+    if os.path.exists(header_before):
+        with open(header_before, 'r') as file:
+            header_f.write(file.read())
+            header_f.write('\n')
     
     # 填充 kconfig 内容
     conf_f = open(conf, 'r', encoding="utf-8")
@@ -93,6 +98,11 @@ def conf2h(conf, header, fw_name, fw_version, board_name):
         header_f.write('#define FIRMWARE_VERSION_HEX    '+__version_string_to_hex(fw_version)+'\n')
         header_f.write('#define HARDWARE_VERSION        "0.1.0"\n')
         header_f.write('#define HARDWARE_VERSION_HEX    0x00000100\n')
+
+    if os.path.exists(header_after):
+        with open(header_after, 'r') as file:
+            header_f.write('\n')
+            header_f.write(file.read())
 
     # 填充尾部
     header_f.write('\n\n#endif\n')
