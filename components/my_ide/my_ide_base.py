@@ -246,8 +246,10 @@ class my_ide_base(object):
                     src_comp_path = self.output['project_path']+'/'+ITEM+'/'+k
                     if os.path.exists(src_comp_path):
                         dst_comp_path = ITEM_PATH+'/'+k
+                        # .git 借助 shutil.copytree 时可能导致路径过长报错，采用乾坤大挪移方式实现
+                        my_file_move_dir_to(src_comp_path+'/.git',".log/.git")
                         my_file_copy_dir_to(src_comp_path,dst_comp_path)
-                        my_file_rm_dir(dst_comp_path+'/.git')
+                        my_file_move_dir_to('.log/.git',src_comp_path+"/.git")
                         base_comp.append(k)
             for k in base_comp:
                 self.output['sdk']['components'].pop(k)

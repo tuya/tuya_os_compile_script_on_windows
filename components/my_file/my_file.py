@@ -32,6 +32,13 @@ def my_file_copy_one_kind_files_to(src_paths,kind,dst_path):
     my_file_copy_files_to(files,dst_path)
 
 
+# 将一个目录移动到另一个目录
+def my_file_move_dir_to(from_path,dst_path):
+    my_file_rm_dir(dst_path)   
+    if os.path.exists(from_path):
+        shutil.move(from_path,dst_path)
+
+
 # 将一个目录复制到另一个目录，如果另一个目录已经存在，则删除之
 def my_file_copy_dir_to(from_path,dst_path):
     my_file_rm_dir(dst_path) 
