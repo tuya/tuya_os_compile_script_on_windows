@@ -28,7 +28,7 @@ class my_ide_codeblocks(my_ide_base):
         my_ide_base.tmake(self,'..')
         
         CODEBLOCKS_PATH = my_exe_get_install_path('$CODEBLOCKS_PATH')   
-        self.cb_path = CODEBLOCKS_PATH+'/codeblocks.exe'
+        self.cb_path = CODEBLOCKS_PATH
 
     def tbuild(self):        
         print('\nBUILD')
@@ -154,6 +154,8 @@ class my_ide_codeblocks(my_ide_base):
         
         elif KIND == '.h':
             Compiler = root.find("Project").find("Build").find("Target").find("Compiler")
+            if Compiler == None:
+                Compiler = root.find("Project").find("Compiler")
 
             for file in LIST:
                 Add = ET.Element('Add', directory = file)
@@ -166,19 +168,24 @@ class my_ide_codeblocks(my_ide_base):
             KIND = '.a'
             
             Linker =  root.find("Project").find("Build").find("Target").find("Linker")
-            Adds = Linker.findall("Add")
+            if Linker == None:
+                Linker = root.find("Project").find("Linker")
+                for file in LIST:
+                    Add = ET.Element('Add', directory = file)
+                    Linker.insert(-1,Add)
+            else:
+                Adds = Linker.findall("Add")
 
-            for add in Adds:
-                if add.get('option') == '--start-group':
-                    for file_dir in LIST:
-                        if file_dir.endswith(KIND):
-                            Add = ET.Element('Add', option = file_dir) 
-                            add.addnext(Add)
-                    break
-        
+                for add in Adds:
+                    if add.get('option') == '--start-group':
+                        for file_dir in LIST:
+                            if file_dir.endswith(KIND):
+                                Add = ET.Element('Add', option = file_dir) 
+                                add.addnext(Add)
+                        break
+            
             ET.indent(tree) # format
             tree.write(cbp_path, encoding='utf-8', xml_declaration=True)
-
 
     # CODEBLOCKS BUILD
     def __build_codeblocks(self):
