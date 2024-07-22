@@ -20,6 +20,34 @@ class my_template():
         for root, dirs, files in os.walk(path):
             return files
 
+    def __modify_prepare_files(self):
+        vendor_path = os.path.join(self.__project_path, "vendor")
+        for root, dirs, files in os.walk(vendor_path):
+            # 只处理一级目录
+            if root == vendor_path:
+                for dir_name in dirs:
+                    prepare_file = os.path.join(vendor_path, dir_name, "prepare.py")
+                    if os.path.exists(prepare_file):
+                        self.__modify_url(prepare_file)
+
+    def __modify_url(self, file_path):
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                content = file.read()
+        except UnicodeDecodeError:
+            with open(file_path, 'r', encoding='gbk') as file:
+                content = file.read()
+
+        from_url = 'https://github.com/nbtool/all_in_one_ide_tool.git' 
+        to_url = 'https://github.com/tuya/tuya_os_compile_script_on_windows.git'
+        if from_url in content:
+            # 修改内容
+            new_content = content.replace(from_url, to_url) 
+
+            with open(file_path, 'w', encoding='utf-8') as file:
+                file.write(new_content)
+            print(f">> Modified URL: {file_path}, {from_url}->{to_url}")
+
     def check(self):
         # 兼容老的情况，通过判断 scripts 中是否有 prepare.py 来判别
         if os.path.exists(self.__project_path+'/scripts/pre_build.py'):
@@ -60,3 +88,6 @@ class my_template():
                 print('-> [N] ' + file + ' is not same')
                 print('\t-> execute: copy ' + file_b + ' to ' + file_a)
                 my_file_copy_file_to_file(file_b,file_a)
+        
+        print('\nChange URL:------------------------')       
+        self.__modify_prepare_files()
