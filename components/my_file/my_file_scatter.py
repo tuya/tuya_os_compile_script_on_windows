@@ -130,8 +130,14 @@ class my_file_scatter:
                         # insert.append('	' + os.path.splitext(FileName.text)[0] + '.lib (+RO)\n')
                         uvprojx_path = os.path.dirname(uvprojx_file)
                         lib_path = uvprojx_path + '/' + FilePath.text
-                          
-                        cmd = '"' + KEIL_PATH + '/ARM/ARMCC/bin/armar.exe" -t ' + lib_path 
+                        
+                        ar_path1 = f"{KEIL_PATH}/ARM/ARMCC/bin/armar.exe"
+                        ar_path2 = f"{KEIL_PATH}/ARM/ARMCLANG/bin/armar.exe"
+                        if os.path.exists(ar_path1):
+                            cmd = '"' + KEIL_PATH + '/ARM/ARMCC/bin/armar.exe" -t ' + lib_path 
+                        else:
+                            cmd = '"' + KEIL_PATH + '/ARM/ARMCLANG/bin/armar.exe" -t ' + lib_path 
+
                         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
                         r = p.stdout.read().decode()
                         
