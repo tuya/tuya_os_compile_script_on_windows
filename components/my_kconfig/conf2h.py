@@ -4,6 +4,9 @@
 # @author huatuo
 import sys
 import os
+import filecmp
+import shutil
+
 
 def __version_string_to_hex(version,kind=None):
     version_int = 0
@@ -40,7 +43,10 @@ def __version_string_to_hex(version,kind=None):
     
 
 def conf2h(conf, header, header_before, header_after, fw_name, fw_version, board_name):
-    header_f = open(header, 'w', encoding="utf-8")
+    if os.path.exists(header):
+        header_f = open(".header.tmp", 'w', encoding="utf-8")
+    else:
+        header_f = open(header, 'w', encoding="utf-8")
     
     # 填充头部
     header_f.write('/*************************************************************************************/\n')
@@ -110,6 +116,11 @@ def conf2h(conf, header, header_before, header_after, fw_name, fw_version, board
     header_f.close()
     conf_f.close()
 
+    if os.path.exists(header):
+        if filecmp.cmp(header,".header.tmp"):
+            os.remove(".header.tmp")
+        else:
+            shutil.move(".header.tmp",header)
 
 if __name__ == "__main__":
     conf_file=sys.argv[1]
