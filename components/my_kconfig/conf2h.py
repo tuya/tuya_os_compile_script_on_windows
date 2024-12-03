@@ -43,7 +43,8 @@ def __version_string_to_hex(version,kind=None):
     
 
 def conf2h(conf, header, header_before, header_after, fw_name, fw_version, board_name):
-    if os.path.exists(header):
+    isexit = os.path.exists(header)
+    if isexit:
         header_f = open(".header.tmp", 'w', encoding="utf-8")
     else:
         header_f = open(header, 'w', encoding="utf-8")
@@ -116,7 +117,7 @@ def conf2h(conf, header, header_before, header_after, fw_name, fw_version, board
     header_f.close()
     conf_f.close()
 
-    if os.path.exists(header):
+    if isexit:
         if filecmp.cmp(header,".header.tmp"):
             os.remove(".header.tmp")
         else:
