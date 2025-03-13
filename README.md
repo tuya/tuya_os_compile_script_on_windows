@@ -209,5 +209,6 @@ else:
 - [02-tag_my_exe_get_install_path.md](./docs/02-tag_my_exe_get_install_path.md)
 - [03-tag_support_app_config_need_libs.md](./docs/03-tag_support_app_config_need_libs.md)
 - [04-tag_support_after_make_call_user_python_scripts.md](./docs/04-tag_support_after_make_call_user_python_scripts.md)
-- [05-tag_support_files_sort.md](./docs/05-tag_support_files_sort.md)
+- [05-tag_support_files_sort.md](./docs/05-tag_support_files_sort.md)     
+- [06-支持应用配置支持的VENDOR.md](./docs/06-支持应用配置支持的VENDOR.md)    
 

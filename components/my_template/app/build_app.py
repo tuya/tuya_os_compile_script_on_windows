@@ -3,6 +3,7 @@ import os
 import sys
 import shutil
 import subprocess
+import re
 
 from pathlib import Path
 
@@ -39,11 +40,35 @@ def get_board_name(path):
         return dirs[0]
 BOARD_NAME = get_board_name('./vendor')
 
+def get_support_boards(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            for line in file:
+                # 去除注释符和空格
+                line = line.strip().lstrip('#').strip()
+                if line.startswith('SUPPORT_BOARDS'):
+                    # 使用正则表达式提取列表内容
+                    match = re.search(r'\[(.*?)\]', line)
+                    if match:
+                        board_str = match.group(1)
+                        # 将字符串分割成列表
+                        boards = [board.strip().strip('"') for board in board_str.split(',')]
+                        return boards
+    except FileNotFoundError:
+        print(f"错误: 文件 {file_path} 未找到。")
+    return []
+SUPPORT_BOARDS = get_support_boards(f"{DEMO_PATH}/tuya_iot.config")
+
 print("DEMO_PATH: " + DEMO_PATH)
 print("DEMO_NAME: " + DEMO_NAME)
 print("DEMO_FIRMWARE_VERSION: " + DEMO_FIRMWARE_VERSION)
 print("BOARD_NAME: " + BOARD_NAME)
+print(f"SUPPORT_BOARDS: {SUPPORT_BOARDS}")
 print("BUILD_COMMAND: " + BUILD_COMMAND)
+
+if len(SUPPORT_BOARDS) > 0 and BOARD_NAME not in SUPPORT_BOARDS:
+    print(f"错误：当前应用不支持当前 VENDOR ({BOARD_NAME})!!!")
+    exit(0)
 
 PYTHON_PATH     = '"'+sys.executable+'"'
 SCRIPT_IDE_TOOL = PYTHON_PATH + ' ./.ide_tool/ide_tool.py'
