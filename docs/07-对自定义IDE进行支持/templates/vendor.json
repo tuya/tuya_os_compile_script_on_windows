@@ -1,0 +1,47 @@
+{
+    "vendor": {
+        "sdk":{
+            "app":{
+                "c_files":[
+                    "$PROJECT_ROOT/vendor/windows/sdk/windows_sdk/app/_main.c"
+                ]
+            },
+            "interface":{
+                "c_files":[
+                    "$PROJECT_ROOT/vendor/windows/sdk/windows_sdk/interface/src/ty_clock.c",
+                    "$PROJECT_ROOT/vendor/windows/sdk/windows_sdk/interface/src/ty_storage_256.c"
+                ],
+                "inc":{
+                   "h_dir":[
+                     "$PROJECT_ROOT/vendor/windows/sdk/windows_sdk/interface/inc"    
+                   ]
+                }
+    	    }
+        }
+    },
+    "tool":{
+		"self":{
+            "toolchain":{
+                "bin_path":""
+            },
+            "cmd":{
+                "before-build":[],
+				"build":["python $PROJECT_ROOT/vendor/windows/toolchain/templates/self/build.py"],
+                "after-build":[],
+				"create_lib":["python $PROJECT_ROOT/vendor/windows/toolchain/templates/self/create_lib.py"]
+            },
+            "output":{
+                "UG":"output.exe",
+                "UA":"output.exe",
+                "QIO":"output.exe",
+                "PROD":"output.exe"
+            },
+            "flash":{
+                "bin_path":"",
+                "flash_user_cmd":"",
+                "flash_all_cmd": ""
+            }
+        }
+    }
+}
+
