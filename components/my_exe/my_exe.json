@@ -54,5 +54,14 @@
         ],
         "FATHER": 0,
         "TITLE": "请选择 CodeBlocks 的可执行文件 \"codeblocks.exe\""
+    },
+    "$CCS_PATH": {
+        "PATH": "C:/ti/ccs2010/ccs/eclipse",
+        "EXE": "ccs-server-cli.sh",
+        "KEY": [
+            "TI_CCS"
+        ],
+        "FATHER": 0,
+        "TITLE": "请选择 ti->ccs->eclipse 的可执行文件 \"ccs-server-cli.sh\""
     }
 }

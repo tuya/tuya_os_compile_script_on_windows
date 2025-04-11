@@ -211,4 +211,6 @@ else:
 - [04-tag_support_after_make_call_user_python_scripts.md](./docs/04-tag_support_after_make_call_user_python_scripts.md)
 - [05-tag_support_files_sort.md](./docs/05-tag_support_files_sort.md)     
 - [06-支持应用配置支持的VENDOR.md](./docs/06-支持应用配置支持的VENDOR.md)    
+- [07-对自定义IDE进行支持](./docs/07-对自定义IDE进行支持/README.md)    
+- [08-支持CCS_IDE](./docs/08-支持CCS_IDE/README.md)    
 

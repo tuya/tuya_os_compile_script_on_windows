@@ -1,0 +1,82 @@
+{
+    "vendor": {
+		"sdk":{
+			"common":{
+				"BLEAppUtil":{
+					"c_files":[
+						"$PROJECT_ROOT/vendor/cc2340_ble/sdk/common/BLEAppUtil/bleapputil_task.c",
+						"$PROJECT_ROOT/vendor/cc2340_ble/sdk/common/BLEAppUtil/bleapputil_init.c",
+						"$PROJECT_ROOT/vendor/cc2340_ble/sdk/common/BLEAppUtil/bleapputil_process.c",
+						"$PROJECT_ROOT/vendor/cc2340_ble/sdk/common/BLEAppUtil/bleapputil_stack_callbacks.c"
+					],
+					"h_dir":[
+						"$PROJECT_ROOT/vendor/cc2340_ble/sdk/common/BLEAppUtil/inc"
+					]
+				},
+				"iCall":{
+					"c_files":[
+						"$PROJECT_ROOT/vendor/cc2340_ble/sdk/common/iCall/icall_POSIX.c"
+					],
+					"h_dir":[
+						"$PROJECT_ROOT/vendor/cc2340_ble/sdk/common/iCall"
+					]
+				},
+				"Startup":{
+					"c_files":[
+						"$PROJECT_ROOT/vendor/cc2340_ble/sdk/common/Startup/osal_icall_ble.c"
+					]
+				},
+				"Util":{
+					"c_files":[
+						"$PROJECT_ROOT/vendor/cc2340_ble/sdk/common/Util/SwUpdate/flash_interface_int_rtos_NVS.c"
+					]
+				},
+				"c_files":[
+					"$PROJECT_ROOT/vendor/cc2340_ble/sdk/common/app_dev_info.c",
+					"$PROJECT_ROOT/vendor/cc2340_ble/sdk/common/app_oad.c"
+				]
+			},
+			"lib":{
+				"h_dir":[
+					"$PROJECT_ROOT/vendor/cc2340_ble/sdk/lib/tal_ble_beacon_remoter/include",
+					"$PROJECT_ROOT/vendor/cc2340_ble/sdk/lib/tal_ble_group/include",
+					"$PROJECT_ROOT/vendor/cc2340_ble/sdk/lib/tal_ble_mbedtls/include",
+					"$PROJECT_ROOT/vendor/cc2340_ble/sdk/lib/tal_ble_secure/include",
+					"$PROJECT_ROOT/vendor/cc2340_ble/sdk/lib/tal_xxtea/include"
+				],
+				"l_files":[
+					"$PROJECT_ROOT/vendor/cc2340_ble/sdk/lib/tuyaos_ble_sdk_lib_for_cc2340.lib"
+				]
+			},
+			"port":{
+				"c_files":[
+					"$PROJECT_ROOT/vendor/cc2340_ble/sdk/port/app_main.c"
+				],
+				"h_dir":[
+					"$PROJECT_ROOT/vendor/cc2340_ble/sdk/port"
+				]
+			}
+		}
+    },
+    "tool":{
+        "ccs":{
+            "toolchain":{
+                "bin_path":"$PROJECT_ROOT/vendor/cc2340_ble/toolchain/templates/ccs"
+            },
+            "cmd":{
+            },
+            "output": {
+                "UG": "app_project/Release/TuyaOS_CC2340.bin",
+                "UA": "app_project/Release/TuyaOS_CC2340.bin",
+                "QIO": "app_project/Release/TuyaOS_CC2340.bin",
+                "PROD": "app_project/Release/TuyaOS_CC2340.bin"
+            },
+            "flash": {
+                "bin_path": "",
+                "flash_user_cmd": "",
+                "flash_all_cmd": ""
+            }
+        }
+    }
+}
+

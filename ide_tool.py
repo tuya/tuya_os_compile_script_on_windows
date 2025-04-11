@@ -24,6 +24,7 @@ from my_ide.my_ide_keil45 import *
 from my_ide.my_ide_iar import *
 from my_ide.my_ide_iar930 import *
 from my_ide.my_ide_self import *
+from my_ide.my_ide_ccs import *
 from my_ide.my_ide_front import my_ide_front
 
 def ide_tool_front(project_path,app_path,vendor_name,output_path,firmware_name,firmware_version):
@@ -53,6 +54,8 @@ def ide_tool_back(OP,JSON_FILE,KIND='gcc'):
         ide = my_ide_iar930(JSON_FILE)
     elif KIND == 'self':
         ide = my_ide_self(JSON_FILE)
+    elif KIND == 'ccs':
+        ide = my_ide_ccs(JSON_FILE)
     ide.tmake()
         
     if OP == 'build':    
