@@ -65,8 +65,8 @@ def _front_libs(APP_LIBS_PATH,LIBS_PATH,INCLUDE_PATH,JSON_ROOT,DEPEND):
             if lib_name.startswith('lib'):
                 lib_name = lib_name[3:]
             
-            lib_path = LIBS_PATH+lib
-            app_lib_path = APP_LIBS_PATH+lib
+            lib_path = LIBS_PATH+"/"+lib
+            app_lib_path = APP_LIBS_PATH+"/"+lib
             if os.path.exists(lib_path):
                 l_list.append(lib_path) 
             elif os.path.exists(app_lib_path):
