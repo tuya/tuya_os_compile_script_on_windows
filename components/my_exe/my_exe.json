@@ -59,7 +59,7 @@
         "PATH": "C:/ti/ccs2010/ccs/eclipse",
         "EXE": "ccs-server-cli.sh",
         "KEY": [
-            "TI_CCS"
+            "ccs"
         ],
         "FATHER": 0,
         "TITLE": "请选择 ti->ccs->eclipse 的可执行文件 \"ccs-server-cli.sh\""
