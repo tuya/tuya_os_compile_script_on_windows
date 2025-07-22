@@ -3,7 +3,7 @@
         "PATH": "C:/Keil_v5",
         "EXE": "UV4.exe",
         "KEY": [
-            "UV4"
+            "Keil_v5"
         ],
         "FATHER": 1,
         "TITLE": "请选择 Keil 的可执行文件 \"UV4.exe\""
@@ -21,7 +21,7 @@
         "PATH": "D:/keil 4",
         "EXE": "UV4.exe",
         "KEY": [
-            "UV4"
+            "keil 4"
         ],
         "FATHER": 1,
         "TITLE": "请选择 Keil4 的可执行文件 \"UV4.exe\""
@@ -30,18 +30,16 @@
         "PATH": "D:/Program Files (x86)/IAR Systems/Embedded Workbench 8.3/common/bin",
         "EXE": "IarBuild.exe",
         "KEY": [
-            "ARM 8.40",
-            "IAR804"
+            "Embedded Workbench 8.3"
         ],
         "FATHER": 0,
         "TITLE": "请选择 IAR 的可执行文件 \"IarBuild.exe\""
     },
     "$IAR930_PATH": {
-        "PATH": "D:/Program Files (x86)/IAR Systems/Embedded Workbench 8.3/common/bin",
+        "PATH": "D:/Program Files (x86)/IAR Systems/Embedded Workbench 9.1/common/bin",
         "EXE": "IarBuild.exe",
         "KEY": [
-            "ARM 9.30",
-            "IAR930"
+            "Embedded Workbench 9.1"
         ],
         "FATHER": 0,
         "TITLE": "请选择 IAR 的可执行文件 \"IarBuild.exe\""
