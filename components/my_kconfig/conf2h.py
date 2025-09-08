@@ -87,7 +87,13 @@ def conf2h(conf, header, header_before, header_after, fw_name, fw_version, board
     
     # 填充固件指纹
     header_f.write('\n//\n// FW_INFO\n//\n')
-    if 'mesh' in board_name:
+    if 'mesh_ble' in board_name:
+        header_f.write('#define FIRMWARE_NAME           "'+fw_name+'"\n')
+        header_f.write('#define FIRMWARE_VERSION        "'+fw_version+'"\n')
+        header_f.write('#define FIRMWARE_VERSION_HEX    '+__version_string_to_hex(fw_version)+'\n')
+        header_f.write('#define HARDWARE_VERSION        "0.1.0"\n')
+        header_f.write('#define HARDWARE_VERSION_HEX    0x00000100\n')
+    elif 'mesh' in board_name:
         header_f.write('#define BUILD_FIRMNAME          "'+fw_name+'"\n')
         header_f.write('#define FW_VERSION              "'+fw_version+'"\n')
         header_f.write('#define FW_VERSION_HEX          '+__version_string_to_hex(fw_version,'mesh')+'\n')
