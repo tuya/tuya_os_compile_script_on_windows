@@ -207,18 +207,36 @@ def my_file_create_subgroup(SOURCES_ROOT,CONFIG_FILE="",filter=""):
 
     return ret
 
-def my_file_get_abs_path_and_formart(relative_path):
-    if relative_path.startswith('.'):
-        return os.path.abspath(os.getcwd()+'/'+relative_path).replace('\\','/')
-    else:
-        return relative_path
+def my_file_get_abs_path_and_formart(paths_str):
+    # 用分号拆分路径，并过滤掉空字符串（防止末尾有分号导致报错）
+    paths = [p.strip() for p in paths_str.split(';') if p.strip()]
+    processed_paths = []
 
-def my_file_path_formart(path_str):
-    path_str = path_str.replace('\\','/')
-    if path_str.endswith('/'):
-        path_str = path_str[:-1]
-    if path_str.startswith('./'):
-        path_str = path_str[2:]
-    return path_str
+    for path in paths:
+        if path.startswith('.'):
+            # os.path.join 比手动拼接 '/' 更安全
+            abs_path = os.path.abspath(os.path.join(os.getcwd(), path))
+            processed_paths.append(abs_path.replace('\\', '/'))
+        else:
+            processed_paths.append(path)
+
+    return ';'.join(processed_paths)
+
+def my_file_path_formart(paths_str):
+    paths = [p.strip() for p in paths_str.split(';') if p.strip()]
+    processed_paths = []
+
+    for path in paths:
+        # 统一替换斜杠
+        path = path.replace('\\', '/')
+        # 去掉结尾斜杠
+        if path.endswith('/') and len(path) > 1:
+            path = path[:-1]
+        # 去掉开头的 ./
+        if path.startswith('./'):
+            path = path[2:]
+        processed_paths.append(path)
+
+    return ';'.join(processed_paths)
 
 
