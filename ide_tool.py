@@ -24,6 +24,7 @@ from my_ide.my_ide_keil45 import *
 from my_ide.my_ide_iar import *
 from my_ide.my_ide_iar930 import *
 from my_ide.my_ide_self import *
+from my_ide.my_ide_mrs import *
 from my_ide.my_ide_ccs import *
 from my_ide.my_ide_front import my_ide_front
 
@@ -54,6 +55,8 @@ def ide_tool_back(OP,JSON_FILE,KIND='gcc'):
         ide = my_ide_iar930(JSON_FILE)
     elif KIND == 'self':
         ide = my_ide_self(JSON_FILE)
+    elif KIND == 'mrs':
+        ide = my_ide_mrs(JSON_FILE)
     elif KIND == 'ccs':
         ide = my_ide_ccs(JSON_FILE)
     ide.tmake()
