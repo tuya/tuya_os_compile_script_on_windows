@@ -38,7 +38,7 @@ class my_ide_keil(my_ide_base):
             sct = my_file_scatter('.log/Demo.uvprojx', '.log/'+self.cmd['scatter_file']['path'], '.log/'+self.cmd['log_file'])
             sct.build_with_scatter_adjust(self.__build_keil)
         else:
-            self.__build_keil()
+            return self.__build_keil()
 
     def _tlib(self,libs_path,incs_path,comp_path,log_path):
         print('# 3.Create libs...')
@@ -96,7 +96,11 @@ class my_ide_keil(my_ide_base):
             # copy keil to output
             keil_path         =  self.cmd['bin_path'][1:] # ../vendor -> ./vendor
             build_path        =  '.log'
-            my_file_copy_dir_contents_to(keil_path,build_path)
+            if self.incremental:
+                # 增量模式下 .log 中保留了 hex 等目录，覆盖拷贝需容忍目录已存在
+                my_file_copy_dir_contents_over(keil_path,build_path)
+            else:
+                my_file_copy_dir_contents_to(keil_path,build_path)
         
             self.uvprojx_path =  build_path+'/Demo.uvprojx' 
 
@@ -221,7 +225,10 @@ class my_ide_keil(my_ide_base):
             if IncludePath.text == None:
                 IncludePath.text = ""
 
-            for path in set(LIST):
+            # 增量编译要求头文件路径顺序确定（set 的遍历顺序每次进程随机，
+            # 会导致 armcc 命令行变化，UV4 判定编译选项变更而全部重编）
+            h_paths = sorted(set(LIST)) if self.incremental else set(LIST)
+            for path in h_paths:
                 IncludePath.text = path  + ";" + IncludePath.text
             
             ET.indent(tree) # format
@@ -257,9 +264,13 @@ class my_ide_keil(my_ide_base):
             t1.start()
         except e:
             pass
-        my_exe_simple(cmd,1,self.uv4_path,None)
+        uv4_ret = my_exe_simple(cmd,1,self.uv4_path,None)
 
         ret = my_ide_base.tbuild(self)
+        # UV4 退出码: 0=成功 1=仅警告 >=2=有错误。增量编译时上次的固件产物仍在，
+        # 仅凭产物存在判断成败不可靠，须结合 UV4 退出码
+        if uv4_ret != None and uv4_ret >= 2:
+            return 0
         return ret
             
         

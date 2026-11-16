@@ -59,10 +59,18 @@ def ide_tool_back(OP,JSON_FILE,KIND='gcc'):
         ide = my_ide_mrs(JSON_FILE)
     elif KIND == 'ccs':
         ide = my_ide_ccs(JSON_FILE)
+
+    # 增量编译：仅对 keil 后端开放（依赖 UV4 -b 的 .dep 增量机制）
+    if OP == 'build_inc':
+        ide.incremental = True
     ide.tmake()
-        
-    if OP == 'build':    
-        ide.tbuild()
+
+    if OP == 'build' or OP == 'build_inc':
+        ret = ide.tbuild()
+        # build_inc 会被用于任务串联（如增量编译+烧录），失败时需返回非零退出码挡住后续步骤；
+        # build 保持原有行为（退出码恒为 0），不影响既有 CI/脚本
+        if OP == 'build_inc' and ret != 1:
+            sys.exit(1)
     elif OP == 'sdk':
         ide.tsdk()
     elif OP == 'flash_user':
@@ -88,7 +96,7 @@ if __name__ == '__main__':
             my_kconfig(sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6],int(sys.argv[7]),int(sys.argv[8])) 
         elif (OP == 'front') and (PARAMS_NUM == 7):
             ide_tool_front(sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6],sys.argv[7])
-        elif (OP == 'build' or OP == 'sdk' or OP == 'flash_user' or OP == 'flash_all') and (PARAMS_NUM == 2):
+        elif (OP == 'build' or OP == 'build_inc' or OP == 'sdk' or OP == 'flash_user' or OP == 'flash_all') and (PARAMS_NUM == 2):
             ide_tool_back(sys.argv[1],sys.argv[2])
         else:
             ide_tool_help()

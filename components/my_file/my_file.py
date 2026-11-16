@@ -88,6 +88,28 @@ def my_file_clear_folder(path):
     time.sleep(1)
     os.makedirs(path)
 
+# 将一个目录下的所有内容覆盖复制到另一个目录，目标中已存在的子目录做合并而不报错
+# （增量编译时目标目录保留了上次的中间产物，不能用 my_file_copy_dir_contents_to）
+def my_file_copy_dir_contents_over(from_path,dst_path):
+    if not os.path.exists(dst_path):
+        os.makedirs(dst_path)
+    shutil.copytree(from_path,dst_path,dirs_exist_ok=True)
+
+# 清空一个文件夹，但保留 keeps 中列出的顶层子项（增量编译时保留编译中间产物）
+def my_file_clear_folder_except(path,keeps):
+    if not os.path.exists(path):
+        os.makedirs(path)
+        return
+
+    for entry in os.listdir(path):
+        if entry in keeps:
+            continue
+        full = os.path.join(path,entry)
+        if os.path.isdir(full):
+            my_file_rm_dir(full)
+        else:
+            my_file_rm_file(full)
+
 # 删除一个文件夹
 def my_file_rm_dir(path):
     if os.path.exists(path):

@@ -28,7 +28,7 @@ def my_exe_simple(cmd,wait=0,my_env=None,var_map=None):
     dev = subprocess.Popen(cmd,env=my_env,shell=True,universal_newlines=True,bufsize=1)
     #dev = subprocess.Popen(cmd,shell=True,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=None,universal_newlines=True,bufsize=1)
     if wait == 1:
-        dev.wait()
+        return dev.wait() # 返回退出码，供调用方判断成败（原有调用方均忽略返回值，不受影响）
 
 def my_exe_make(cmd,wait=0):
     toolchain_path = my_exe_file_dir

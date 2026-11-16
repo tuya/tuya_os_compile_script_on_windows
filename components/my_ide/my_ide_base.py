@@ -13,6 +13,8 @@ class my_ide_base(object):
     json_file = ""
     __log_path = '.log'
     
+    incremental = False # 增量编译标志（build_inc），默认关闭，不影响原有 build/sdk 流程
+
     src = {'c_files':[],'h_dirs':[],'l_files':[],'s_files':[],
            'h_dir_str':'','l_files_str':'','l_dirs_str':''}
     output = {}
@@ -31,7 +33,13 @@ class my_ide_base(object):
         print('> clean .log \n> copy json_file to .log')
 
         if self.ide_kind != 'gcc':
-            my_file_clear_folder(self.__log_path)
+            if self.incremental:
+                # 增量编译：保留编译中间产物（.o/.d/.dep），使 UV4 -b 可以跳过未改动的文件；
+                # hex 也需保留：完全无改动时 UV4 跳过链接和 After-Build，上次的固件产物要能继续使用
+                print('> incremental: keep Objects/Listings/hex in .log')
+                my_file_clear_folder_except(self.__log_path,['Objects','Listings','hex'])
+            else:
+                my_file_clear_folder(self.__log_path)
         else:
             with open(self.json_file,'r') as load_f:
                 load_dict = json.load(load_f)
